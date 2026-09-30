@@ -1,10 +1,10 @@
-# ⏱️ Productivity & Activity Tracker
+# Traceo
 
 > An intelligent, end-to-end cross-platform activity and productivity tracking ecosystem. Seamlessly captures active desktop application usage, browser navigation, and YouTube learning sessions, consolidating all telemetry into a modern, real-time analytics dashboard with strict user privacy controls.
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
 - [Overview](#-overview)
 - [System Architecture](#-system-architecture)
@@ -23,7 +23,7 @@
 
 ---
 
-## 🌟 Overview
+## Overview
 
 The **Productivity & Activity Tracker** is composed of four modular, high-performance components:
 
@@ -34,7 +34,7 @@ The **Productivity & Activity Tracker** is composed of four modular, high-perfor
 
 ---
 
-## 🏛️ System Architecture
+##  System Architecture
 
 ```mermaid
 flowchart TD
@@ -44,18 +44,18 @@ flowchart TD
     end
 
     subgraph Server["FastAPI Backend (Port 8000)"]
-        AUTH["🔐 JWT Auth & Security"]
-        PERM["🛡️ Privacy & Permissions Guard"]
-        INGEST["📥 Ingestion Endpoints\n(/track/*)"]
-        DASH_API["📊 Dashboard Analytics Engine\n(/dashboard/*)"]
+        AUTH["JWT Auth & Security"]
+        PERM["Privacy & Permissions Guard"]
+        INGEST["Ingestion Endpoints\n(/track/*)"]
+        DASH_API["Dashboard Analytics Engine\n(/dashboard/*)"]
     end
 
     subgraph Storage["Database Layer"]
-        DB[("🐘 PostgreSQL Database\n(Users, AppUsage, BrowserActivity,\nYouTubeActivity, Permissions)")]
+        DB[("PostgreSQL Database\n(Users, AppUsage, BrowserActivity,\nYouTubeActivity, Permissions)")]
     end
 
     subgraph UI["User Interface (Port 5173)"]
-        WEB["💻 React + Vite Dashboard\n(Charts, Tables, Privacy Settings)"]
+        WEB[" React + Vite Dashboard\n(Charts, Tables, Privacy Settings)"]
     end
 
     DA -- "POST /track/app-usage (Batched)" --> INGEST
@@ -70,7 +70,7 @@ flowchart TD
 
 ---
 
-## ⚡ Key Features
+##  Key Features
 
 - **Accurate Window Interval Tracking**:
   - Automatically records exact start/end timestamps and active durations for applications (e.g. VS Code, Chrome, Slack).
@@ -94,7 +94,7 @@ flowchart TD
 
 ---
 
-## 📂 Repository Structure
+##  Repository Structure
 
 ```
 tracker-phase1-backend/
@@ -148,7 +148,7 @@ Before getting started, make sure you have the following installed:
 
 ---
 
-## 🚀 Quick Start Guide
+## Quick Start Guide
 
 ### 1. Backend Setup (FastAPI & PostgreSQL)
 
@@ -291,7 +291,7 @@ The extension tracks browser page visits and YouTube playback.
 
 ---
 
-## 🎯 How to Use the System
+## How to Use the System
 
 1. **Sign Up / Log In**:
    - Visit `http://localhost:5173/signup` and create an account.
@@ -354,7 +354,7 @@ The FastAPI backend provides structured REST endpoints:
 
 ---
 
-## 🔒 Privacy & Security
+## Privacy & Security
 
 - **Strict Access Control**: All telemetry endpoints are protected with standard OAuth2 Bearer JWT authentication tokens.
 - **Granular Privacy Flags**: Users can independently disable App Tracking, Browser Tracking, or YouTube Tracking. When a permission is disabled, the backend immediately responds with `403 Forbidden` and does not save the record.
@@ -363,7 +363,7 @@ The FastAPI backend provides structured REST endpoints:
 
 ---
 
-## ❓ Troubleshooting & FAQ
+## Troubleshooting & FAQ
 
 #### 1. Backend database connection fails on startup
 - Make sure PostgreSQL service is running:
@@ -384,6 +384,6 @@ The FastAPI backend provides structured REST endpoints:
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License. Feel free to customize and extend it for your personal or organizational productivity tracking needs!
