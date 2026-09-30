@@ -28,7 +28,7 @@ import { UsageTimeLineChart } from "../components/UsageTimeLineChart";
 import { YouTubeActivityList } from "../components/YouTubeActivityList";
 
 export const DashboardPage = () => {
-  const [range, setRange] = useState("7d");
+  const [range, setRange] = useState("today");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [summary, setSummary] = useState(null);
