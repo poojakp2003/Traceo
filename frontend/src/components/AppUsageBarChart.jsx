@@ -144,7 +144,7 @@ export const AppUsageBarChart = ({ items = [], totalDurationFormatted = "0 mins"
           color: "var(--text-secondary)",
         }}
       >
-        <span>Top App: <strong style={{ color: "var(--text-primary)" }}>{items[0]?.app_name || "N/A"}</strong></span>
+        <span>Browser: <strong style={{ color: "var(--text-primary)" }}>{items[0]?.app_name || "N/A"}</strong></span>
         <span>Total: <strong style={{ color: "var(--primary)" }}>{totalDurationFormatted}</strong></span>
       </div>
     </div>
