@@ -341,8 +341,9 @@ export const DashboardPage = () => {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
                 gap: "12px",
+                alignItems: "stretch",
               }}
             >
               {browserData.items.map((b, idx) => (
@@ -352,14 +353,37 @@ export const DashboardPage = () => {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
+                    gap: "10px",
+                    minWidth: 0,
+                    minHeight: "52px",
                     padding: "10px 14px",
                     background: "rgba(255, 255, 255, 0.025)",
                     border: "1px solid var(--border-subtle)",
                     borderRadius: "var(--radius-md)",
                   }}
                 >
-                  <span style={{ fontWeight: 500, fontSize: "0.88rem" }}>{b.domain}</span>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span
+                    title={b.domain}
+                    style={{
+                      fontWeight: 500,
+                      fontSize: "0.88rem",
+                      minWidth: 0,
+                      flex: 1,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {b.domain}
+                  </span>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      flexShrink: 0,
+                    }}
+                  >
                     <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem" }}>
                       {b.visit_count}
                     </span>
