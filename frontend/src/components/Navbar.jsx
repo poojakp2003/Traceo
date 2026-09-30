@@ -29,7 +29,7 @@ export const Navbar = () => {
           }}>
             <Activity size={18} color="#FFFFFF" />
           </div>
-          <span>Track<span className="nav-brand-gradient">Pulse</span></span>
+          <span>Trac<span className="nav-brand-gradient">eo</span></span>
         </Link>
 
         <nav className="nav-links">
