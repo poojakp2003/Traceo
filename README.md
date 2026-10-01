@@ -39,8 +39,8 @@ The **Productivity & Activity Tracker** is composed of four modular, high-perfor
 ```mermaid
 flowchart TD
     subgraph Clients["Data Collection Clients"]
-        DA["🖥️ Desktop Agent\n(Foreground Window Monitor)"]
-        CE["🌐 Chrome Extension\n(Tab & YouTube Tracker)"]
+        DA[" Desktop Agent\n(Foreground Window Monitor)"]
+        CE[" Chrome Extension\n(Tab & YouTube Tracker)"]
     end
 
     subgraph Server["FastAPI Backend (Port 8000)"]
@@ -137,7 +137,7 @@ tracker-phase1-backend/
 
 ---
 
-## 🛠️ Prerequisites
+## Prerequisites
 
 Before getting started, make sure you have the following installed:
 
@@ -154,7 +154,7 @@ Before getting started, make sure you have the following installed:
 
 1. Open a terminal and navigate to `backend/`:
    ```bash
-   cd tracker-phase1-backend/backend
+   cd traceo-phase1-backend/backend
    ```
 
 2. Create and activate a Python virtual environment:
@@ -176,7 +176,7 @@ Before getting started, make sure you have the following installed:
 4. Configure the environment file (`.env`):
    Create a `.env` file in the `backend/` directory:
    ```ini
-   DATABASE_URL=postgresql://postgres:your_password@localhost:5432/tracker_db
+   DATABASE_URL=postgresql://postgres:your_password@localhost:5432/traceo_db
    SECRET_KEY=your_super_secret_jwt_random_key_here
    ```
    *(Ensure the PostgreSQL database `tracker_db` is created in your PostgreSQL instance.)*
@@ -199,7 +199,7 @@ Before getting started, make sure you have the following installed:
 
 1. Open a new terminal and navigate to `frontend/`:
    ```bash
-   cd tracker-phase1-backend/frontend
+   cd traceo-phase1-backend/frontend
    ```
 
 2. Install dependencies:
@@ -222,7 +222,7 @@ The Desktop Agent tracks active application windows and sends usage intervals to
 
 1. Open a terminal and navigate to `desktop-agent/`:
    ```bash
-   cd tracker-phase1-backend/desktop-agent
+   cd traceo-phase1-backend/desktop-agent
    ```
 
 2. Install dependencies:
@@ -279,7 +279,7 @@ The extension tracks browser page visits and YouTube playback.
    ```
 2. Enable **Developer mode** (toggle in the top-right corner).
 3. Click **Load unpacked** (top-left button).
-4. Select the `tracker-phase1-backend/chrome-extension` folder.
+4. Select the `traceo-phase1-backend/chrome-extension` folder.
 5. *(Recommended)* Enable Incognito tracking:
    - Click **Details** on the installed *Productivity & Activity Tracker* card.
    - Toggle **Allow in incognito** to **ON**.
@@ -314,7 +314,7 @@ The extension tracks browser page visits and YouTube playback.
 
 ---
 
-## 🔌 REST API Endpoints
+## REST API Endpoints
 
 The FastAPI backend provides structured REST endpoints:
 
