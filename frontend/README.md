@@ -1,4 +1,4 @@
-# Tracker — React + Vite Frontend
+# Traceo — React + Vite Frontend
 
 Modern, high-performance activity and productivity dashboard powered by React, Vite, React Router, and Axios.
 
@@ -6,7 +6,7 @@ Modern, high-performance activity and productivity dashboard powered by React, V
 
 ### 1. Install Dependencies
 ```bash
-cd c:\TRACKER\tracker-phase1-backend\frontend
+cd c:\TRACEO\traceo-phase1-backend\frontend
 npm install
 ```
 
@@ -19,7 +19,7 @@ The frontend will start on **http://localhost:5173**.
 ### 3. Ensure Backend is Running
 In another terminal:
 ```bash
-cd c:\TRACKER\tracker-phase1-backend\backend
+cd c:\TRACEO\traceo-phase1-backend\backend
 uvicorn app.main:app --reload
 ```
 The FastAPI backend runs on **http://localhost:8000**.
