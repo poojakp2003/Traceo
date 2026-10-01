@@ -1,6 +1,6 @@
-# Tracker Desktop Agent (Phase 6)
+# Traceo Desktop Agent (Phase 6)
 
-A lightweight background daemon that automatically monitors active desktop applications, records usage intervals, and dispatches batches of telemetry to the Tracker FastAPI backend.
+A lightweight background daemon that automatically monitors active desktop applications, records usage intervals, and dispatches batches of telemetry to the Traceo FastAPI backend.
 
 ---
 
