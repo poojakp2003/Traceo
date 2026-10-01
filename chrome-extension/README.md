@@ -1,4 +1,4 @@
-# Productivity & Activity Tracker — Chrome Extension (Phase 7)
+# Productivity & Activity Traceo — Chrome Extension (Phase 7)
 
 A lightweight, secure Google Chrome extension built with **Manifest V3** to automatically track web navigation activity, identify YouTube learning sessions, and batch-dispatch telemetry to your local FastAPI backend and PostgreSQL database.
 
@@ -39,7 +39,7 @@ A lightweight, secure Google Chrome extension built with **Manifest V3** to auto
 1. Click the **Load unpacked** button in the top left.
 2. Select the `chrome-extension` folder located at:
    ```
-   C:\TRACKER\tracker-phase1-backend\chrome-extension
+   C:\TRACEO\traceo-phase1-backend\chrome-extension
    ```
 3. The extension **Productivity & Activity Tracker** will now appear in your extensions list.
 
