@@ -230,7 +230,7 @@ The Desktop Agent tracks active application windows and sends usage intervals to
    pip install -r requirements.txt
    ```
 
-3. Edit `config.json` with your account credentials:
+3. Create and edit `config.json` with your account credentials:
    ```json
    {
      "backend_url": "http://127.0.0.1:8000",
