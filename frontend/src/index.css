@@ -3,6 +3,9 @@
   --bg-card: rgba(17, 24, 39, 0.75);
   --bg-card-hover: rgba(31, 41, 55, 0.85);
   --bg-input: rgba(15, 23, 42, 0.8);
+  --bg-item-row: rgba(255, 255, 255, 0.025);
+  --bg-item-row-hover: rgba(255, 255, 255, 0.05);
+  --navbar-bg: rgba(11, 15, 25, 0.85);
   --border-subtle: rgba(255, 255, 255, 0.08);
   --border-focus: rgba(6, 182, 212, 0.5);
   
@@ -31,6 +34,34 @@
   --shadow-glow: 0 0 20px var(--primary-glow);
 }
 
+[data-theme="light"] {
+  --bg-main: #F8FAFC;
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-card-hover: #F1F5F9;
+  --bg-input: #FFFFFF;
+  --bg-item-row: rgba(241, 245, 249, 0.7);
+  --bg-item-row-hover: #E2E8F0;
+  --navbar-bg: rgba(255, 255, 255, 0.88);
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-focus: rgba(6, 182, 212, 0.6);
+  
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  
+  --primary: #0891B2;
+  --primary-hover: #0E7490;
+  --primary-glow: rgba(8, 145, 178, 0.18);
+  
+  --accent-purple: #7C3AED;
+  --accent-emerald: #059669;
+  --accent-amber: #D97706;
+  --accent-rose: #E11D48;
+  
+  --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.06), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+  --shadow-glow: 0 0 20px rgba(8, 145, 178, 0.12);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -48,18 +79,32 @@ body {
   min-height: 100vh;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.7s cubic-bezier(0.4, 0, 0.2, 1), color 0.55s ease;
+}
+
+[data-theme="light"] body {
+  background-color: var(--bg-main);
+  background-image: 
+    radial-gradient(circle at 15% 15%, rgba(6, 182, 212, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.05) 0%, transparent 40%);
+  color: var(--text-primary);
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   font-weight: 600;
   letter-spacing: -0.02em;
+  transition: color 0.5s ease;
+}
+
+p, span, label {
+  transition: color 0.45s ease;
 }
 
 a {
   color: var(--primary);
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color 0.3s ease;
 }
 
 a:hover {
@@ -74,7 +119,7 @@ a:hover {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.25s ease, border-color 0.7s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.7s ease, background 0.7s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-card:hover {
@@ -112,6 +157,7 @@ a:hover {
   background: rgba(255, 255, 255, 0.06);
   color: var(--text-primary);
   border: 1px solid var(--border-subtle);
+  transition: background-color 0.65s ease, border-color 0.65s ease, color 0.5s ease, transform 0.2s ease;
 }
 
 .btn-secondary:hover:not(:disabled) {
@@ -206,7 +252,7 @@ a:hover {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(11, 15, 25, 0.85);
+  background: var(--navbar-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border-subtle);
@@ -214,6 +260,11 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  transition: background-color 0.7s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.7s ease, box-shadow 0.7s ease;
+}
+
+[data-theme="light"] .navbar {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .nav-brand {
@@ -252,6 +303,31 @@ a:hover {
   background: rgba(255, 255, 255, 0.06);
 }
 
+[data-theme="light"] .nav-link:hover,
+[data-theme="light"] .nav-link.active {
+  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.nav-user-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  transition: background-color 0.65s ease, border-color 0.65s ease, color 0.5s ease;
+}
+
+[data-theme="light"] .nav-user-pill {
+  background: #F1F5F9;
+  border-color: #E2E8F0;
+  color: var(--text-secondary);
+}
+
 /* Layout container */
 .container {
   max-width: 1240px;
@@ -268,6 +344,12 @@ a:hover {
   border: 1px solid var(--border-subtle);
   gap: 4px;
   width: fit-content;
+  transition: background-color 0.65s ease, border-color 0.65s ease;
+}
+
+[data-theme="light"] .filter-bar {
+  background: #E2E8F0;
+  border-color: rgba(0, 0, 0, 0.08);
 }
 
 .filter-pill {
@@ -292,6 +374,50 @@ a:hover {
   box-shadow: 0 2px 8px var(--primary-glow);
 }
 
+[data-theme="light"] .filter-pill.active {
+  color: #FFFFFF;
+}
+
+/* Light Theme tweaks for cards & buttons */
+[data-theme="light"] .glass-card {
+  box-shadow: var(--shadow-card);
+}
+
+[data-theme="light"] .glass-card:hover {
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 14px 28px -5px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .btn-secondary {
+  background: #FFFFFF;
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .btn-secondary:hover:not(:disabled) {
+  background: #F1F5F9;
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .badge-cyan {
+  background: rgba(8, 145, 178, 0.12);
+  color: #0891B2;
+  border-color: rgba(8, 145, 178, 0.25);
+}
+
+[data-theme="light"] .badge-emerald {
+  background: rgba(5, 150, 105, 0.12);
+  color: #059669;
+  border-color: rgba(5, 150, 105, 0.25);
+}
+
+[data-theme="light"] .badge-purple {
+  background: rgba(124, 58, 237, 0.12);
+  color: #7C3AED;
+  border-color: rgba(124, 58, 237, 0.25);
+}
+
 /* Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }
@@ -314,71 +440,251 @@ a:hover {
   animation: pulse 1.5s infinite;
 }
 
-/* Custom Toggle Switch Styles for Settings */
-.tracking-switch-btn {
+[data-theme="light"] .skeleton {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* Settings Row Cards */
+.settings-row-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 16px;
+  background: var(--bg-item-row);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  transition: background-color 0.7s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.7s ease, box-shadow 0.7s ease;
+  gap: 14px;
+}
+
+.settings-row-card:hover {
+  background: var(--bg-item-row-hover);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+[data-theme="light"] .settings-row-card:hover {
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+/* ========================================================
+   MODERN CAPSULE TOGGLE SWITCH SUITE
+   ======================================================== */
+
+.capsule-switch-wrapper {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 16px;
-  border-radius: 9999px;
-  font-family: var(--font-sans);
-  font-weight: 700;
-  font-size: 0.85rem;
-  letter-spacing: 0.05em;
+  gap: 12px;
+  user-select: none;
+  border: none;
+  background: transparent;
+  padding: 0;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  border: 1px solid transparent;
+}
+
+.capsule-switch-wrapper:focus-visible {
+  outline: none;
+}
+
+.capsule-switch-wrapper:focus-visible .capsule-switch {
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+/* Track Capsule Base */
+.capsule-switch {
+  position: relative;
+  width: 54px;
+  height: 28px;
+  border-radius: 9999px;
+  transition: background 0.65s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.65s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.65s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.3s ease;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Hover effect on capsule */
+.capsule-switch-wrapper:hover:not([aria-disabled="true"]) .capsule-switch {
+  transform: translateY(-0.5px);
+}
+
+/* Sliding Knob (Thumb) */
+.capsule-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35), 0 0 1px rgba(0, 0, 0, 0.2);
+  transition: transform 0.6s cubic-bezier(0.34, 1.2, 0.64, 1),
+              background-color 0.65s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.65s ease,
+              color 0.55s ease,
+              box-shadow 0.65s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Icon rotation and transition */
+.capsule-knob svg {
+  transition: transform 0.6s cubic-bezier(0.34, 1.2, 0.64, 1), opacity 0.4s ease, color 0.5s ease;
+}
+
+.capsule-switch.theme-light .capsule-knob svg {
+  transform: rotate(0deg);
+}
+
+.capsule-switch.theme-dark .capsule-knob svg {
+  transform: rotate(360deg);
+}
+
+
+
+/* --------------------------------------------------------
+   Tracking Toggle Variant:
+   - Pointing RIGHT = ON (active emerald)
+   - Pointing LEFT = OFF (muted gray)
+   -------------------------------------------------------- */
+
+.capsule-switch.tracking-on {
+  background: linear-gradient(135deg, #059669, #047857);
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 14px rgba(4, 120, 87, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.25);
+}
+
+.capsule-switch.tracking-on .capsule-knob {
+  transform: translateX(26px);
+  background: #FFFFFF;
+}
+
+.capsule-switch.tracking-off {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35);
+}
+
+.capsule-switch.tracking-off .capsule-knob {
+  transform: translateX(0px);
+  background: #E2E8F0;
+}
+
+[data-theme="light"] .capsule-switch.tracking-off {
+  background: #E2E8F0;
+  border: 1px solid #CBD5E1;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .capsule-switch.tracking-off .capsule-knob {
+  background: #FFFFFF;
+}
+
+/* --------------------------------------------------------
+   Theme Toggle Variant:
+   - By default theme is dark ("same color") -> Pointing RIGHT
+   - When clicked, moves to LEFT -> White Theme View
+   -------------------------------------------------------- */
+
+.capsule-switch.theme-switch-capsule {
+  width: 58px;
+  height: 30px;
+}
+
+.theme-switch-capsule .capsule-knob {
+  width: 24px;
+  height: 24px;
+}
+
+/* Pointing RIGHT = Default Dark Space Theme */
+.capsule-switch.theme-dark {
+  background: linear-gradient(135deg, #1E293B, #0F172A);
+  border: 1px solid rgba(6, 182, 212, 0.45);
+  box-shadow: 0 0 14px rgba(6, 182, 212, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.capsule-switch.theme-dark .capsule-knob {
+  transform: translateX(28px);
+  background: #0B0F19;
+  border: 1px solid rgba(6, 182, 212, 0.5);
+  color: #22D3EE;
+}
+
+/* Pointing LEFT = White Theme View */
+.capsule-switch.theme-light {
+  background: linear-gradient(135deg, #FDE68A, #F59E0B);
+  border: 1px solid rgba(245, 158, 11, 0.6);
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.35), inset 0 1px 3px rgba(255, 255, 255, 0.4);
+}
+
+.capsule-switch.theme-light .capsule-knob {
+  transform: translateX(0px);
+  background: #FFFFFF;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #D97706;
+}
+
+/* --------------------------------------------------------
+   Status Pills beside capsule switches
+   -------------------------------------------------------- */
+
+.capsule-status-pill {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  min-width: 62px;
+  text-align: center;
+  transition: all 0.25s ease;
   user-select: none;
 }
 
-.tracking-switch-btn.on {
+.capsule-status-pill.on {
   background: rgba(16, 185, 129, 0.16);
-  border-color: rgba(16, 185, 129, 0.4);
+  border: 1px solid rgba(16, 185, 129, 0.4);
   color: #34D399;
-  box-shadow: 0 0 16px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
 }
 
-.tracking-switch-btn.on:hover:not(:disabled) {
-  background: rgba(16, 185, 129, 0.25);
-  border-color: rgba(16, 185, 129, 0.6);
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
-  transform: translateY(-1px);
-}
-
-.tracking-switch-btn.off {
+.capsule-status-pill.off {
   background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: var(--text-muted);
 }
 
-.tracking-switch-btn.off:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.09);
-  border-color: rgba(255, 255, 255, 0.2);
-  color: var(--text-secondary);
-  transform: translateY(-1px);
+[data-theme="light"] .capsule-status-pill.off {
+  background: #E2E8F0;
+  border-color: #CBD5E1;
+  color: #64748B;
 }
 
-.tracking-switch-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none !important;
+.capsule-status-pill.theme-dark-label {
+  background: rgba(6, 182, 212, 0.14);
+  border: 1px solid rgba(6, 182, 212, 0.35);
+  color: #22D3EE;
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.18);
+  min-width: 104px;
 }
 
-/* Indicator dot inside toggle */
-.tracking-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  transition: all 0.25s ease;
+.capsule-status-pill.theme-light-label {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #D97706;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
+  min-width: 104px;
 }
 
-.tracking-dot.on {
-  background-color: #10B981;
-  box-shadow: 0 0 8px #10B981;
-}
-
-.tracking-dot.off {
-  background-color: #64748B;
+/* Backwards compatibility classes */
+.tracking-switch-btn {
+  display: none;
 }
 
 /* Toast container */
@@ -399,9 +705,108 @@ a:hover {
   color: #34D399;
 }
 
+[data-theme="light"] .toast-success {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+}
+
 .toast-error {
   background: rgba(244, 63, 94, 0.15);
   border: 1px solid rgba(244, 63, 94, 0.35);
   color: #FB7185;
 }
+
+[data-theme="light"] .toast-error {
+  background: rgba(244, 63, 94, 0.12);
+  color: #E11D48;
+}
+
+/* ========================================================
+   TOP-RIGHT SMALL BOX TOAST NOTIFICATION
+   (Positioned directly below user email and Logout button)
+   ======================================================== */
+@keyframes toastSlideInSmooth {
+  0% {
+    opacity: 0;
+    transform: translateY(-22px) scale(0.90);
+    filter: blur(4px);
+  }
+  60% {
+    opacity: 0.95;
+    transform: translateY(1px) scale(1.01);
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+  }
+}
+
+@keyframes toastSlideOutSmooth {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-18px) scale(0.90);
+    filter: blur(4px);
+  }
+}
+
+.toast-small-box {
+  position: fixed;
+  top: 72px;
+  right: 24px;
+  z-index: 99999;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.015em;
+  user-select: none;
+  cursor: pointer;
+  animation: toastSlideInSmooth 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.toast-small-box.toast-exiting {
+  animation: toastSlideOutSmooth 0.65s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.toast-small-box:hover {
+  transform: translateY(-1px) scale(1.02);
+}
+
+/* Darker rich emerald box for ON */
+.toast-small-box.toast-on {
+  background: linear-gradient(135deg, #047857 0%, #064E3B 100%);
+  color: #FFFFFF;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  box-shadow: 0 12px 28px -4px rgba(4, 120, 87, 0.5), 0 4px 10px -2px rgba(0, 0, 0, 0.35);
+}
+
+/* Darker rich crimson box for OFF */
+.toast-small-box.toast-off {
+  background: linear-gradient(135deg, #991B1B 0%, #7F1D1D 100%);
+  color: #FFFFFF;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  box-shadow: 0 12px 28px -4px rgba(153, 27, 27, 0.5), 0 4px 10px -2px rgba(0, 0, 0, 0.35);
+}
+
+@media (max-width: 640px) {
+  .toast-small-box {
+    top: 68px;
+    right: 16px;
+  }
+}
+
 
