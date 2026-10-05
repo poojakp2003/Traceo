@@ -57,7 +57,7 @@ export const BrowserActivityTable = ({ items = [], loading = false }) => {
             display: "flex",
             alignItems: "center",
             gap: "8px",
-            background: "rgba(15, 23, 42, 0.6)",
+            background: "var(--bg-input)",
             border: "1px solid var(--border-subtle)",
             borderRadius: "var(--radius-sm)",
             padding: "6px 12px",
@@ -112,12 +112,12 @@ export const BrowserActivityTable = ({ items = [], loading = false }) => {
                   <tr
                     key={item.id || idx}
                     style={{
-                      background: "rgba(255, 255, 255, 0.025)",
+                      background: "var(--bg-item-row)",
                       borderRadius: "var(--radius-sm)",
                       transition: "background 0.2s ease",
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255, 255, 255, 0.025)")}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-item-row-hover)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "var(--bg-item-row)")}
                   >
                     <td style={{ padding: "10px 12px", borderTopLeftRadius: "8px", borderBottomLeftRadius: "8px" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>

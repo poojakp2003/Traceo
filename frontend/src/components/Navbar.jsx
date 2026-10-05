@@ -54,17 +54,7 @@ export const Navbar = () => {
 
       <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
         {user && (
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "6px 12px",
-            background: "rgba(255, 255, 255, 0.04)",
-            border: "1px solid var(--border-subtle)",
-            borderRadius: "9999px",
-            fontSize: "0.85rem",
-            color: "var(--text-secondary)",
-          }}>
+          <div className="nav-user-pill">
             <UserIcon size={14} color="var(--primary)" />
             <span>{user.email}</span>
           </div>
