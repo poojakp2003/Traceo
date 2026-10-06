@@ -1,14 +1,36 @@
 import React, { useState } from "react";
-import { ExternalLink, Play, Search, Video } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, Play, Search, Video } from "lucide-react";
+
+const PAGE_SIZE = 10;
 
 export const YouTubeActivityList = ({ items = [], loading = false, totalWatchedFormatted = "0 mins" }) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const filteredItems = items
     .filter((item) =>
       item.video_title.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => new Date(b.last_watched) - new Date(a.last_watched));
+
+  const totalPages = Math.ceil(filteredItems.length / PAGE_SIZE) || 1;
+  const safePage = Math.min(Math.max(1, currentPage), totalPages);
+  const startIndex = (safePage - 1) * PAGE_SIZE;
+  const endIndex = Math.min(startIndex + PAGE_SIZE, filteredItems.length);
+  const paginatedItems = filteredItems.slice(startIndex, startIndex + PAGE_SIZE);
+
+  const getPageNumbers = () => {
+    if (totalPages <= 4) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (safePage <= 3) {
+      return [1, 2, 3, "...", totalPages];
+    }
+    if (safePage >= totalPages - 2) {
+      return [1, "...", totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [1, "...", safePage - 1, safePage, safePage + 1, "...", totalPages];
+  };
 
   return (
     <div className="glass-card" style={{ padding: "24px", display: "flex", flexDirection: "column" }}>
@@ -66,7 +88,10 @@ export const YouTubeActivityList = ({ items = [], loading = false, totalWatchedF
             type="text"
             placeholder="Search tutorials..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
             style={{
               background: "transparent",
               border: "none",
@@ -103,7 +128,7 @@ export const YouTubeActivityList = ({ items = [], loading = false, totalWatchedF
               </tr>
             </thead>
             <tbody>
-              {filteredItems.slice(0, 10).map((yt, idx) => (
+              {paginatedItems.map((yt, idx) => (
                 <tr
                   key={yt.video_id || idx}
                   style={{
@@ -190,16 +215,139 @@ export const YouTubeActivityList = ({ items = [], loading = false, totalWatchedF
               ))}
             </tbody>
           </table>
-          {filteredItems.length > 10 && (
+          {/* Pagination Controls */}
+          {filteredItems.length > 0 && (
             <div
               style={{
-                textAlign: "center",
-                paddingTop: "10px",
-                color: "var(--text-muted)",
-                fontSize: "0.8rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: "12px",
+                marginTop: "14px",
+                paddingTop: "12px",
+                borderTop: "1px solid var(--border-subtle)",
+                fontSize: "0.82rem",
               }}
             >
-              Showing 10 of {filteredItems.length} watched videos
+              <div style={{ color: "var(--text-muted)" }}>
+                Showing{" "}
+                <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
+                  {filteredItems.length === 0 ? 0 : startIndex + 1}
+                </span>
+                {"–"}
+                <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
+                  {endIndex}
+                </span>{" "}
+                of{" "}
+                <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
+                  {filteredItems.length}
+                </span>{" "}
+                watched videos
+              </div>
+
+              {totalPages > 1 && (
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={safePage === 1}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      padding: "5px 10px",
+                      borderRadius: "var(--radius-sm)",
+                      background: "rgba(255, 255, 255, 0.05)",
+                      border: "1px solid var(--border-subtle)",
+                      color: safePage === 1 ? "var(--text-muted)" : "var(--text-primary)",
+                      cursor: safePage === 1 ? "not-allowed" : "pointer",
+                      opacity: safePage === 1 ? 0.45 : 1,
+                      fontSize: "0.8rem",
+                      transition: "all 0.2s ease",
+                    }}
+                    title="Previous page"
+                    aria-label="Previous page"
+                  >
+                    <ChevronLeft size={14} />
+                    <span>Prev</span>
+                  </button>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    {getPageNumbers().map((num, idx) => {
+                      if (num === "...") {
+                        return (
+                          <span
+                            key={`ellipsis-${idx}`}
+                            style={{
+                              padding: "0 4px",
+                              color: "var(--text-muted)",
+                              fontSize: "0.8rem",
+                            }}
+                          >
+                            ...
+                          </span>
+                        );
+                      }
+                      const isCurrent = num === safePage;
+                      return (
+                        <button
+                          type="button"
+                          key={num}
+                          onClick={() => setCurrentPage(num)}
+                          style={{
+                            minWidth: "28px",
+                            height: "28px",
+                            padding: "0 6px",
+                            borderRadius: "var(--radius-sm)",
+                            background: isCurrent ? "rgba(244, 63, 94, 0.2)" : "rgba(255, 255, 255, 0.04)",
+                            border: isCurrent
+                              ? "1px solid rgba(244, 63, 94, 0.5)"
+                              : "1px solid var(--border-subtle)",
+                            color: isCurrent ? "#FB7185" : "var(--text-secondary)",
+                            fontWeight: isCurrent ? 600 : 400,
+                            cursor: "pointer",
+                            fontSize: "0.8rem",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            transition: "all 0.2s ease",
+                          }}
+                          aria-label={`Page ${num}`}
+                          aria-current={isCurrent ? "page" : undefined}
+                        >
+                          {num}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={safePage === totalPages}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      padding: "5px 10px",
+                      borderRadius: "var(--radius-sm)",
+                      background: "rgba(255, 255, 255, 0.05)",
+                      border: "1px solid var(--border-subtle)",
+                      color: safePage === totalPages ? "var(--text-muted)" : "var(--text-primary)",
+                      cursor: safePage === totalPages ? "not-allowed" : "pointer",
+                      opacity: safePage === totalPages ? 0.45 : 1,
+                      fontSize: "0.8rem",
+                      transition: "all 0.2s ease",
+                    }}
+                    title="Next page"
+                    aria-label="Next page"
+                  >
+                    <span>Next</span>
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

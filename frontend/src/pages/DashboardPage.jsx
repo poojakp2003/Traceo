@@ -56,7 +56,7 @@ export const DashboardPage = () => {
         getDashboardApps(range),
         getDashboardTimeline(range),
         getDashboardBrowser(range),
-        getDashboardBrowserHistory(range, 30),
+        getDashboardBrowserHistory(range, 100),
         getDashboardYouTube(range),
       ]);
 
