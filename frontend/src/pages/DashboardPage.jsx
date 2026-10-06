@@ -42,6 +42,7 @@ export const DashboardPage = () => {
   const fetchData = async (isManualRefresh = false) => {
     if (isManualRefresh) setRefreshing(true);
     setError("");
+    const startTime = Date.now();
 
     try {
       const [
@@ -71,7 +72,13 @@ export const DashboardPage = () => {
       setError("Failed to fetch dashboard data. Please ensure the backend is running.");
     } finally {
       setLoading(false);
-      if (isManualRefresh) setRefreshing(false);
+      if (isManualRefresh) {
+        const elapsed = Date.now() - startTime;
+        if (elapsed < 750) {
+          await new Promise((resolve) => setTimeout(resolve, 750 - elapsed));
+        }
+        setRefreshing(false);
+      }
     }
   };
 
@@ -105,15 +112,16 @@ export const DashboardPage = () => {
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <RangeSelector currentRange={range} onSelectRange={setRange} />
             <button
+              type="button"
               onClick={() => fetchData(true)}
               disabled={refreshing}
-              className="btn btn-secondary"
-              style={{ padding: "8px 12px" }}
-              title="Refresh metrics"
+              className={`btn-reload ${refreshing ? "is-refreshing" : ""}`}
+              title={refreshing ? "Refreshing metrics..." : "Refresh metrics"}
+              aria-label="Refresh metrics"
             >
               <RefreshCw
-                size={15}
-                style={{ animation: refreshing ? "spin 1s linear infinite" : "none" }}
+                size={16}
+                className={`reload-icon ${refreshing ? "spinning" : ""}`}
               />
             </button>
           </div>
