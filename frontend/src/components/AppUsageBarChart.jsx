@@ -118,6 +118,7 @@ export const AppUsageBarChart = ({ items = [], totalDurationFormatted = "0 mins"
               tickFormatter={(val) => (isHoursMode ? `${val}h` : `${val}m`)}
               stroke="#64748B"
               fontSize={12}
+              fontFamily="var(--font-satoshi), 'Satoshi', sans-serif"
               tickLine={false}
               axisLine={{ stroke: "rgba(255, 255, 255, 0.1)" }}
             />
@@ -165,7 +166,7 @@ export const AppUsageBarChart = ({ items = [], totalDurationFormatted = "0 mins"
         }}
       >
         <span>Top App: <strong style={{ color: "var(--text-primary)" }}>{items[0]?.app_name || "N/A"}</strong></span>
-        <span>Total: <strong style={{ color: "var(--primary)" }}>{totalDurationFormatted}</strong></span>
+        <span>Total: <strong className="font-satoshi-num" style={{ color: "var(--primary)" }}>{totalDurationFormatted}</strong></span>
       </div>
     </div>
   );

@@ -107,19 +107,23 @@ export const BrowserActivityTable = ({ items = [], loading = false }) => {
           <Search size={14} color="var(--text-muted)" />
           <input
             type="text"
-            placeholder="Search URLs..."
+            placeholder="Search"
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
+            className="search-input-satoshi"
             style={{
               background: "transparent",
               border: "none",
               outline: "none",
               color: "var(--text-primary)",
-              fontSize: "0.85rem",
-              width: "140px",
+              fontSize: "0.86rem",
+              width: "120px",
+              fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
+              fontWeight: 500,
+              letterSpacing: "-0.015em",
             }}
           />
         </div>
@@ -217,10 +221,11 @@ export const BrowserActivityTable = ({ items = [], loading = false }) => {
                       <span
                         className="badge badge-emerald"
                         style={{
-                          fontSize: "0.8rem",
+                          fontSize: "0.82rem",
                           fontWeight: 600,
-                          fontFamily: "monospace",
-                          letterSpacing: "0.5px",
+                          fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
+                          fontVariantNumeric: "tabular-nums",
+                          letterSpacing: "0.03em",
                         }}
                       >
                         {item.time_formatted || "—"}
@@ -246,17 +251,27 @@ export const BrowserActivityTable = ({ items = [], loading = false }) => {
                 fontSize: "0.82rem",
               }}
             >
-              <div style={{ color: "var(--text-muted)" }}>
+              <div style={{ color: "var(--text-muted)", fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif" }}>
                 Showing{" "}
-                <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
-                  {filteredItems.length === 0 ? 0 : startIndex + 1}
-                </span>
-                {"–"}
-                <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
-                  {endIndex}
-                </span>{" "}
+                {filteredItems.length === 0 ? (
+                  <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>0</span>
+                ) : startIndex + 1 >= endIndex ? (
+                  <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
+                    {endIndex}
+                  </span>
+                ) : (
+                  <>
+                    <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
+                      {startIndex + 1}
+                    </span>
+                    {"–"}
+                    <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
+                      {endIndex}
+                    </span>
+                  </>
+                )}{" "}
                 of{" "}
-                <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
+                <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
                   {filteredItems.length}
                 </span>{" "}
                 visited pages
@@ -321,9 +336,11 @@ export const BrowserActivityTable = ({ items = [], loading = false }) => {
                               ? "1px solid rgba(16, 185, 129, 0.5)"
                               : "1px solid var(--border-subtle)",
                             color: isCurrent ? "#34D399" : "var(--text-secondary)",
-                            fontWeight: isCurrent ? 600 : 400,
+                            fontWeight: isCurrent ? 600 : 500,
+                            fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
+                            fontVariantNumeric: "tabular-nums",
                             cursor: "pointer",
-                            fontSize: "0.8rem",
+                            fontSize: "0.82rem",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",

@@ -1,3 +1,5 @@
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap');
+
 :root {
   --bg-main: #0B0F19;
   --bg-card: rgba(17, 24, 39, 0.75);
@@ -24,6 +26,7 @@
   
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-heading: 'Outfit', sans-serif;
+  --font-satoshi: 'Satoshi', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -227,6 +230,15 @@ a:hover {
   border-radius: 9999px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  font-family: var(--font-satoshi), 'Satoshi', sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.font-satoshi-num {
+  font-family: var(--font-satoshi), 'Satoshi', sans-serif !important;
+  font-variant-numeric: tabular-nums !important;
+  font-feature-settings: "tnum" 1 !important;
 }
 
 .badge-cyan {
@@ -357,6 +369,7 @@ a:hover {
   border-radius: var(--radius-sm);
   font-size: 0.85rem;
   font-weight: 600;
+  font-family: var(--font-satoshi), 'Satoshi', sans-serif;
   color: var(--text-secondary);
   background: transparent;
   border: none;
@@ -899,6 +912,26 @@ a:hover {
     box-shadow: 0 0 22px rgba(6, 182, 212, 0.45), inset 0 0 14px rgba(6, 182, 212, 0.25);
     border-color: rgba(6, 182, 212, 0.75);
   }
+}
+
+/* ------------------------------------------------------------- */
+/* Satoshi Search Input Typography                               */
+/* ------------------------------------------------------------- */
+
+.search-input-satoshi {
+  font-family: var(--font-satoshi), 'Satoshi', sans-serif !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.015em;
+  font-size: 0.86rem;
+  color: var(--text-primary);
+}
+
+.search-input-satoshi::placeholder {
+  font-family: var(--font-satoshi), 'Satoshi', sans-serif !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.01em;
+  color: var(--text-muted);
+  opacity: 0.85;
 }
 
 

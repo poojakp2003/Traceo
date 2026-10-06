@@ -33,7 +33,15 @@ export const StatCard = ({ title, value, subtitle, icon: Icon, color = "var(--pr
         )}
       </div>
 
-      <div style={{ fontSize: "1.85rem", fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.02em", marginBottom: "6px" }}>
+      <div style={{
+        fontSize: "1.85rem",
+        fontWeight: 700,
+        color: "var(--text-primary)",
+        letterSpacing: "-0.02em",
+        marginBottom: "6px",
+        fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
+        fontVariantNumeric: "tabular-nums",
+      }}>
         {value}
       </div>
 

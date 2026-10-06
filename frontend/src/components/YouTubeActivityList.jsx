@@ -86,19 +86,23 @@ export const YouTubeActivityList = ({ items = [], loading = false, totalWatchedF
           <Search size={14} color="var(--text-muted)" />
           <input
             type="text"
-            placeholder="Search tutorials..."
+            placeholder="Search"
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
+            className="search-input-satoshi"
             style={{
               background: "transparent",
               border: "none",
               outline: "none",
               color: "var(--text-primary)",
-              fontSize: "0.85rem",
-              width: "140px",
+              fontSize: "0.86rem",
+              width: "120px",
+              fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
+              fontWeight: 500,
+              letterSpacing: "-0.015em",
             }}
           />
         </div>
@@ -189,16 +193,27 @@ export const YouTubeActivityList = ({ items = [], loading = false, totalWatchedF
                     }}
                   >
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "14px" }}>
-                      <span style={{ color: "var(--text-muted)", fontSize: "0.85rem", minWidth: "18px", textAlign: "center" }}>
+                      <span
+                        style={{
+                          color: "var(--text-muted)",
+                          fontSize: "0.85rem",
+                          minWidth: "18px",
+                          textAlign: "center",
+                          fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
+                          fontVariantNumeric: "tabular-nums",
+                          fontWeight: 600,
+                        }}
+                      >
                         {yt.watch_count}
                       </span>
                       <span
                         style={{
                           color: "#FB7185",
                           fontWeight: 600,
-                          fontSize: "0.8rem",
-                          fontFamily: "monospace",
-                          letterSpacing: "0.5px",
+                          fontSize: "0.82rem",
+                          fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
+                          fontVariantNumeric: "tabular-nums",
+                          letterSpacing: "0.03em",
                           padding: "4px 10px",
                           background: "rgba(244, 63, 94, 0.1)",
                           borderRadius: "var(--radius-sm)",
@@ -230,17 +245,27 @@ export const YouTubeActivityList = ({ items = [], loading = false, totalWatchedF
                 fontSize: "0.82rem",
               }}
             >
-              <div style={{ color: "var(--text-muted)" }}>
+              <div style={{ color: "var(--text-muted)", fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif" }}>
                 Showing{" "}
-                <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
-                  {filteredItems.length === 0 ? 0 : startIndex + 1}
-                </span>
-                {"–"}
-                <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
-                  {endIndex}
-                </span>{" "}
+                {filteredItems.length === 0 ? (
+                  <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>0</span>
+                ) : startIndex + 1 >= endIndex ? (
+                  <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
+                    {endIndex}
+                  </span>
+                ) : (
+                  <>
+                    <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
+                      {startIndex + 1}
+                    </span>
+                    {"–"}
+                    <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
+                      {endIndex}
+                    </span>
+                  </>
+                )}{" "}
                 of{" "}
-                <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
+                <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
                   {filteredItems.length}
                 </span>{" "}
                 watched videos
@@ -305,9 +330,11 @@ export const YouTubeActivityList = ({ items = [], loading = false, totalWatchedF
                               ? "1px solid rgba(244, 63, 94, 0.5)"
                               : "1px solid var(--border-subtle)",
                             color: isCurrent ? "#FB7185" : "var(--text-secondary)",
-                            fontWeight: isCurrent ? 600 : 400,
+                            fontWeight: isCurrent ? 600 : 500,
+                            fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
+                            fontVariantNumeric: "tabular-nums",
                             cursor: "pointer",
-                            fontSize: "0.8rem",
+                            fontSize: "0.82rem",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",

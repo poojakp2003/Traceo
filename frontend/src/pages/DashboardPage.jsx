@@ -408,10 +408,25 @@ export const DashboardPage = () => {
                         flexShrink: 0,
                       }}
                     >
-                      <span style={{ color: "var(--text-secondary)", fontSize: "0.8rem" }}>
+                      <span
+                        style={{
+                          color: "var(--text-secondary)",
+                          fontSize: "0.82rem",
+                          fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
+                          fontVariantNumeric: "tabular-nums",
+                          fontWeight: 500,
+                        }}
+                      >
                         {b.visit_count}
                       </span>
-                      <span className="badge badge-emerald" style={{ fontSize: "0.7rem" }}>
+                      <span
+                        className="badge badge-emerald"
+                        style={{
+                          fontSize: "0.72rem",
+                          fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
+                          fontVariantNumeric: "tabular-nums",
+                        }}
+                      >
                         {b.percentage}%
                       </span>
                     </div>

@@ -99,6 +99,7 @@ export const UsageTimeLineChart = ({ items = [], totalHours = 0, range = "7d" })
               dataKey="displayLabel"
               stroke="#94A3B8"
               fontSize={12}
+              fontFamily="var(--font-satoshi), 'Satoshi', sans-serif"
               tickLine={false}
               axisLine={{ stroke: "rgba(255, 255, 255, 0.1)" }}
             />
@@ -106,6 +107,7 @@ export const UsageTimeLineChart = ({ items = [], totalHours = 0, range = "7d" })
               unit="h"
               stroke="#64748B"
               fontSize={12}
+              fontFamily="var(--font-satoshi), 'Satoshi', sans-serif"
               tickLine={false}
               axisLine={{ stroke: "rgba(255, 255, 255, 0.1)" }}
             />
@@ -146,7 +148,7 @@ export const UsageTimeLineChart = ({ items = [], totalHours = 0, range = "7d" })
           <Calendar size={14} color="var(--accent-purple)" />
           <span>Active Trend ({range.toUpperCase()})</span>
         </span>
-        <span>Avg/Day: <strong style={{ color: "var(--accent-purple)" }}>
+        <span>Avg/Day: <strong className="font-satoshi-num" style={{ color: "var(--accent-purple)" }}>
           {items.length > 0 ? (totalHours / items.length).toFixed(1) : 0} hrs
         </strong></span>
       </div>
