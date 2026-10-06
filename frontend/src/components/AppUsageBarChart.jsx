@@ -21,7 +21,7 @@ const BAR_COLORS = [
 ];
 
 // Custom Tooltip component for Dark Glassmorphism aesthetic
-const CustomTooltip = ({ active, payload }) => {
+const CustomTooltip = ({ active, payload, isHoursMode }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
@@ -42,7 +42,9 @@ const CustomTooltip = ({ active, payload }) => {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#22D3EE", fontSize: "0.85rem", marginBottom: "2px" }}>
           <Clock size={14} />
-          <span>{data.duration_formatted} ({data.hours} hrs)</span>
+          <span>
+            {data.duration_formatted} ({data.displayValue} {isHoursMode ? "hrs" : "mins"})
+          </span>
         </div>
         <div style={{ color: "#94A3B8", fontSize: "0.8rem" }}>
           {data.session_count} {data.session_count === 1 ? "session" : "sessions"} • {data.percentage}%
@@ -76,11 +78,25 @@ export const AppUsageBarChart = ({ items = [], totalDurationFormatted = "0 mins"
     );
   }
 
-  // Format data for Recharts: calculate hours as decimal for the bar length
-  const chartData = items.slice(0, 8).map((item) => ({
-    ...item,
-    hours: Number((item.duration_seconds / 3600).toFixed(2)),
-  }));
+  // Find top timed app duration
+  const topAppDurationSeconds = Math.max(
+    ...items.slice(0, 8).map((item) => item.duration_seconds || 0),
+    0
+  );
+
+  // If top timed app reaches 1 hour (>= 3600 seconds), convert X-axis to hours; otherwise show in minutes
+  const isHoursMode = topAppDurationSeconds >= 3600;
+
+  const chartData = items.slice(0, 8).map((item) => {
+    const sec = item.duration_seconds || 0;
+    const displayValue = isHoursMode
+      ? Number((sec / 3600).toFixed(2))
+      : Number((sec / 60).toFixed(1));
+    return {
+      ...item,
+      displayValue,
+    };
+  });
 
   return (
     <div>
@@ -98,7 +114,8 @@ export const AppUsageBarChart = ({ items = [], totalDurationFormatted = "0 mins"
             />
             <XAxis
               type="number"
-              unit="h"
+              dataKey="displayValue"
+              tickFormatter={(val) => (isHoursMode ? `${val}h` : `${val}m`)}
               stroke="#64748B"
               fontSize={12}
               tickLine={false}
@@ -113,9 +130,12 @@ export const AppUsageBarChart = ({ items = [], totalDurationFormatted = "0 mins"
               axisLine={{ stroke: "rgba(255, 255, 255, 0.1)" }}
               width={90}
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(255, 255, 255, 0.03)" }} />
+            <Tooltip
+              content={<CustomTooltip isHoursMode={isHoursMode} />}
+              cursor={{ fill: "rgba(255, 255, 255, 0.03)" }}
+            />
             <Bar
-              dataKey="hours"
+              dataKey="displayValue"
               radius={[0, 6, 6, 0]}
               barSize={20}
               animationDuration={800}
@@ -144,7 +164,7 @@ export const AppUsageBarChart = ({ items = [], totalDurationFormatted = "0 mins"
           color: "var(--text-secondary)",
         }}
       >
-        <span>Browser: <strong style={{ color: "var(--text-primary)" }}>{items[0]?.app_name || "N/A"}</strong></span>
+        <span>Top App: <strong style={{ color: "var(--text-primary)" }}>{items[0]?.app_name || "N/A"}</strong></span>
         <span>Total: <strong style={{ color: "var(--primary)" }}>{totalDurationFormatted}</strong></span>
       </div>
     </div>
