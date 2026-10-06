@@ -71,10 +71,13 @@ class DesktopAgent:
         window_info = get_active_window()
 
         if window_info is not None:
-            # Check ignored apps list
+            # Check ignored apps and project windows
+            title_lower = (window_info.window_title or "").lower()
             is_ignored = (
                 window_info.app_name in self.config.ignored_apps
                 or (window_info.window_title and window_info.window_title in self.config.ignored_apps)
+                or "localhost:5173" in title_lower
+                or "127.0.0.1:5173" in title_lower
             )
 
             if is_ignored:

@@ -107,6 +107,38 @@ def track_app_usage_batch(
 
 
 
+IGNORED_HOSTS = [
+    "localhost:5173",
+    "127.0.0.1:5173",
+    "localhost:8000",
+    "127.0.0.1:8000",
+    "localhost:3000",
+    "127.0.0.1:3000",
+]
+
+
+def is_project_url(url: str | None) -> bool:
+    """Check if URL points to the local project frontend or backend services."""
+    if not url:
+        return False
+    cleaned = url.strip().lower()
+    for host in IGNORED_HOSTS:
+        if host in cleaned:
+            return True
+    try:
+        from urllib.parse import urlparse
+        target = cleaned if cleaned.startswith(("http://", "https://")) else "https://" + cleaned
+        parsed = urlparse(target)
+        hostname = (parsed.hostname or "").lower()
+        port = parsed.port
+        if hostname in ("localhost", "127.0.0.1", "0.0.0.0", "::1"):
+            if port in (5173, 8000, 3000) or not port:
+                return True
+    except Exception:
+        pass
+    return False
+
+
 @router.post(
     "/browser-activity",
     response_model=BrowserActivityResponse | list[BrowserActivityResponse],
@@ -128,6 +160,9 @@ def track_browser_activity(
     if isinstance(payload, list):
         if not payload:
             return []
+        valid_items = [item for item in payload if not is_project_url(item.url)]
+        if not valid_items:
+            return []
         records = [
             BrowserActivity(
                 user_id=current_user.id,
@@ -136,13 +171,24 @@ def track_browser_activity(
                 title=item.title,
                 timestamp=item.timestamp,
             )
-            for item in payload
+            for item in valid_items
         ]
         db.add_all(records)
         db.commit()
         for r in records:
             db.refresh(r)
         return records
+
+    if is_project_url(payload.url):
+        # Do not persist internal project URL visits to database
+        return BrowserActivity(
+            id=0,
+            user_id=current_user.id,
+            browser=payload.browser,
+            url=payload.url,
+            title=payload.title,
+            timestamp=payload.timestamp,
+        )
 
     record = BrowserActivity(
         user_id=current_user.id,

@@ -17,6 +17,16 @@ let refreshPromise = null; // prevents parallel refresh calls
 /* Setup                                                               */
 /* ------------------------------------------------------------------ */
 
+async function cleanStoredProjectUrls() {
+  const current = await chrome.storage.local.get(["eventQueue", "recentVisits"]);
+  const queue = (current.eventQueue || []).filter((e) => !isProjectUrl(e.url));
+  const recent = (current.recentVisits || []).filter((e) => !isProjectUrl(e.url));
+  await chrome.storage.local.set({
+    eventQueue: queue,
+    recentVisits: recent,
+  });
+}
+
 chrome.runtime.onInstalled.addListener(async () => {
   console.log("[Tracker] Extension installed / reloaded.");
 
@@ -28,11 +38,14 @@ chrome.runtime.onInstalled.addListener(async () => {
     "lastSyncTime",
   ]);
 
+  const cleanQueue = (current.eventQueue || []).filter((e) => !isProjectUrl(e.url));
+  const cleanRecent = (current.recentVisits || []).filter((e) => !isProjectUrl(e.url));
+
   await chrome.storage.local.set({
     apiUrl: current.apiUrl || DEFAULT_API_URL,
     trackingEnabled: current.trackingEnabled !== undefined ? current.trackingEnabled : true,
-    eventQueue: current.eventQueue || [],
-    recentVisits: current.recentVisits || [],
+    eventQueue: cleanQueue,
+    recentVisits: cleanRecent,
     lastSyncTime: current.lastSyncTime || null,
     syncStatus: "Ready",
   });
@@ -46,7 +59,10 @@ function ensureFlushAlarm() {
   });
 }
 ensureFlushAlarm();
-chrome.runtime.onStartup.addListener(ensureFlushAlarm);
+chrome.runtime.onStartup.addListener(async () => {
+  ensureFlushAlarm();
+  await cleanStoredProjectUrls();
+});
 
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === FLUSH_ALARM_NAME) {
@@ -131,6 +147,39 @@ function isValidWebUrl(url) {
   }
 }
 
+const PROJECT_IGNORED_PORTS = new Set(["5173", "3000", "8000"]);
+const PROJECT_IGNORED_HOSTNAMES = new Set(["localhost", "127.0.0.1", "0.0.0.0", "[::1]"]);
+
+function isProjectUrl(url) {
+  if (!url || typeof url !== "string") return false;
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname.toLowerCase();
+    const port = parsed.port;
+
+    if (PROJECT_IGNORED_HOSTNAMES.has(hostname)) {
+      if (PROJECT_IGNORED_PORTS.has(port) || !port) {
+        return true;
+      }
+    }
+
+    const host = parsed.host.toLowerCase();
+    if (
+      host === "localhost:5173" ||
+      host === "127.0.0.1:5173" ||
+      host === "localhost:8000" ||
+      host === "127.0.0.1:8000" ||
+      host === "localhost:3000" ||
+      host === "127.0.0.1:3000"
+    ) {
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 function parseYouTubeDetails(url) {
   if (!url || typeof url !== "string") {
     return { isYouTube: false, videoId: null, isShort: false };
@@ -204,7 +253,7 @@ async function enqueueBrowserVisit(tab, triggerType = "update") {
   }
 
   const url = tab.url;
-  if (!isValidWebUrl(url)) {
+  if (!isValidWebUrl(url) || isProjectUrl(url)) {
     return;
   }
 
@@ -328,7 +377,13 @@ async function flushQueue() {
       "authState",
     ]);
 
-    if (eventQueue.length === 0) return { success: true, count: 0 };
+    const rawQueue = eventQueue || [];
+    const validQueue = rawQueue.filter((e) => !isProjectUrl(e.url));
+    if (validQueue.length !== rawQueue.length) {
+      await chrome.storage.local.set({ eventQueue: validQueue });
+    }
+
+    if (validQueue.length === 0) return { success: true, count: 0 };
 
     if (!token || authState === "expired") {
       console.warn("[Tracker] Cannot flush queue: not authenticated. Please log in via popup.");
@@ -336,7 +391,7 @@ async function flushQueue() {
       return { success: false, error: "Authentication Required" };
     }
 
-    const batch = eventQueue.slice(0, 30);
+    const batch = validQueue.slice(0, 30);
     const sentIds = new Set(batch.map((e) => e.id));
 
     await chrome.storage.local.set({ syncStatus: "Syncing..." });

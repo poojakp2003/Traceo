@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import desc, func, select
+from sqlalchemy import desc, func, not_, or_, select
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -28,6 +28,45 @@ from app.schemas.dashboard import (
 )
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
+
+
+IGNORED_HOSTS = [
+    "localhost:5173",
+    "127.0.0.1:5173",
+    "localhost:8000",
+    "127.0.0.1:8000",
+    "localhost:3000",
+    "127.0.0.1:3000",
+]
+
+
+def is_project_url(url: str | None) -> bool:
+    """Check if URL points to the local project frontend or backend services."""
+    if not url:
+        return False
+    cleaned = url.strip().lower()
+    for host in IGNORED_HOSTS:
+        if host in cleaned:
+            return True
+    try:
+        target = cleaned if cleaned.startswith(("http://", "https://")) else "https://" + cleaned
+        parsed = urlparse(target)
+        hostname = (parsed.hostname or "").lower()
+        port = parsed.port
+        if hostname in ("localhost", "127.0.0.1", "0.0.0.0", "::1"):
+            if port in (5173, 8000, 3000) or not port:
+                return True
+    except Exception:
+        pass
+    return False
+
+
+def is_project_domain(domain: str | None) -> bool:
+    """Check if domain belongs to the local project."""
+    if not domain:
+        return False
+    lower = domain.strip().lower()
+    return any(h in lower for h in IGNORED_HOSTS) or lower in ("localhost", "127.0.0.1")
 
 
 def get_range_cutoff(range_key: str) -> datetime | None:
@@ -139,7 +178,8 @@ def get_dashboard_summary(
 
     total_browser_visits = db.scalar(
         select(func.count(BrowserActivity.id)).where(
-            BrowserActivity.user_id == current_user.id
+            BrowserActivity.user_id == current_user.id,
+            not_(or_(*(BrowserActivity.url.ilike(f"%{h}%") for h in IGNORED_HOSTS))),
         )
     ) or 0
 
@@ -229,7 +269,8 @@ def get_dashboard_browser(
     cutoff = get_range_cutoff(range)
 
     query = select(BrowserActivity.url, BrowserActivity.timestamp).where(
-        BrowserActivity.user_id == current_user.id
+        BrowserActivity.user_id == current_user.id,
+        not_(or_(*(BrowserActivity.url.ilike(f"%{h}%") for h in IGNORED_HOSTS))),
     )
 
     if cutoff is not None:
@@ -242,12 +283,14 @@ def get_dashboard_browser(
 
     for row in rows:
         dom = extract_domain(row.url)
+        if is_project_url(row.url) or is_project_domain(dom):
+            continue
         domain_counts[dom] += 1
         ts = row.timestamp
         if dom not in domain_latest or ts > domain_latest[dom]:
             domain_latest[dom] = ts
 
-    total_visits = len(rows)
+    total_visits = sum(domain_counts.values())
     sorted_domains = sorted(domain_counts.items(), key=lambda x: x[1], reverse=True)
 
     items: list[BrowserDomainItem] = []
@@ -428,11 +471,27 @@ def get_dashboard_browser_history(
     db: Session = Depends(get_db),
 ) -> DashboardBrowserHistoryResponse:
     """Retrieve chronological list of individual browser history records."""
+    # Proactively clean up any legacy internal project records for the user
+    try:
+        cleanup_query = select(BrowserActivity.id).where(
+            BrowserActivity.user_id == current_user.id,
+            or_(*(BrowserActivity.url.ilike(f"%{h}%") for h in IGNORED_HOSTS)),
+        )
+        bad_ids = db.scalars(cleanup_query).all()
+        if bad_ids:
+            db.query(BrowserActivity).filter(BrowserActivity.id.in_(bad_ids)).delete(synchronize_session=False)
+            db.commit()
+    except Exception:
+        db.rollback()
+
     cutoff = get_range_cutoff(range)
 
     query = (
         select(BrowserActivity)
-        .where(BrowserActivity.user_id == current_user.id)
+        .where(
+            BrowserActivity.user_id == current_user.id,
+            not_(or_(*(BrowserActivity.url.ilike(f"%{h}%") for h in IGNORED_HOSTS))),
+        )
         .order_by(desc(BrowserActivity.timestamp))
     )
 
@@ -444,11 +503,14 @@ def get_dashboard_browser_history(
 
     items: list[BrowserHistoryItem] = []
     for row in rows:
+        dom = extract_domain(row.url)
+        if is_project_url(row.url) or is_project_domain(dom):
+            continue
         items.append(
             BrowserHistoryItem(
                 id=row.id,
                 url=row.url,
-                domain=extract_domain(row.url),
+                domain=dom,
                 title=row.title,
                 browser=row.browser,
                 timestamp=row.timestamp,

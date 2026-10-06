@@ -221,5 +221,35 @@ def test_permissions_flow_and_gating(client: TestClient, auth_headers: dict[str,
     assert res_app_blocked.status_code == 403
 
 
+def test_track_browser_activity_ignores_project_urls(client: TestClient, auth_headers: dict[str, str]) -> None:
+    """Ensure visits to localhost:5173 (project itself) are not tracked or saved."""
+    # 1. Single item with localhost:5173
+    res_single = client.post(
+        "/track/browser-activity",
+        headers=auth_headers,
+        json={
+            "browser": "Chrome",
+            "url": "http://localhost:5173/",
+            "title": "Traceo",
+        },
+    )
+    assert res_single.status_code == 201
+    assert res_single.json()["id"] == 0  # not saved to DB
+
+    # 2. Batch with localhost:5173 and valid external URL
+    res_batch = client.post(
+        "/track/browser-activity",
+        headers=auth_headers,
+        json=[
+            {"browser": "Chrome", "url": "http://localhost:5173/dashboard", "title": "Traceo Dashboard"},
+            {"browser": "Chrome", "url": "https://python.org", "title": "Python"},
+        ],
+    )
+    assert res_batch.status_code == 201
+    batch_data = res_batch.json()
+    assert len(batch_data) == 1
+    assert batch_data[0]["url"] == "https://python.org"
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

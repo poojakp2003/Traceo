@@ -1,10 +1,28 @@
 import React, { useState } from "react";
 import { ExternalLink, Globe, Search } from "lucide-react";
 
+const isProjectUrl = (url = "", domain = "") => {
+  const check = (str) => {
+    if (!str) return false;
+    const lower = str.toLowerCase();
+    return (
+      lower.includes("localhost:5173") ||
+      lower.includes("127.0.0.1:5173") ||
+      lower.includes("localhost:8000") ||
+      lower.includes("127.0.0.1:8000") ||
+      lower.includes("localhost:3000") ||
+      lower.includes("127.0.0.1:3000")
+    );
+  };
+  return check(url) || check(domain);
+};
+
 export const BrowserActivityTable = ({ items = [], loading = false }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredItems = items.filter((item) => {
+  const visibleItems = items.filter((item) => !isProjectUrl(item.url, item.domain));
+
+  const filteredItems = visibleItems.filter((item) => {
     const term = searchTerm.toLowerCase();
     return (
       item.url.toLowerCase().includes(term) ||

@@ -120,17 +120,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  function isProjectUrl(url) {
+    if (!url || typeof url !== "string") return false;
+    try {
+      const parsed = new URL(url);
+      const host = parsed.host.toLowerCase();
+      const hostname = parsed.hostname.toLowerCase();
+      const port = parsed.port;
+      if (["localhost", "127.0.0.1", "0.0.0.0"].includes(hostname)) {
+        if (["5173", "3000", "8000"].includes(port) || !port) return true;
+      }
+      if (["localhost:5173", "127.0.0.1:5173", "localhost:8000", "127.0.0.1:8000"].includes(host)) return true;
+      return false;
+    } catch {
+      return false;
+    }
+  }
+
   /**
    * Render the recent visits list.
    */
   function renderVisits(visits) {
-    if (!visits || visits.length === 0) {
+    const filtered = (visits || []).filter((v) => !isProjectUrl(v.url));
+    if (!filtered || filtered.length === 0) {
       visitsList.innerHTML = '<div class="empty-state">No tabs recorded yet. Start browsing!</div>';
       return;
     }
 
     visitsList.innerHTML = "";
-    visits.forEach((v) => {
+    filtered.forEach((v) => {
       const item = document.createElement("div");
       item.className = `visit-item ${v.isYouTube ? "youtube" : ""}`;
 

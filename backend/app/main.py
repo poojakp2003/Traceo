@@ -1,15 +1,43 @@
+from contextlib import asynccontextmanager
+
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import text
+from sqlalchemy import or_, text
 from sqlalchemy.orm import Session
 
-from app.core.database import get_db
+from app.core.database import SessionLocal, get_db
 from app.routers.auth import router as auth_router
 from app.routers.dashboard import router as dashboard_router
 from app.routers.permissions import router as permissions_router
 from app.routers.tracking import router as tracking_router
 
-app = FastAPI(title="Tracker API")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application startup and shutdown lifespan handler."""
+    try:
+        from app.models.browser_activity import BrowserActivity
+
+        ignored_hosts = [
+            "localhost:5173",
+            "127.0.0.1:5173",
+            "localhost:8000",
+            "127.0.0.1:8000",
+            "localhost:3000",
+            "127.0.0.1:3000",
+        ]
+        with SessionLocal() as db:
+            cond = or_(*(BrowserActivity.url.ilike(f"%{h}%") for h in ignored_hosts))
+            deleted = db.query(BrowserActivity).filter(cond).delete(synchronize_session=False)
+            db.commit()
+            if deleted:
+                print(f"[Tracker API] Purged {deleted} legacy internal project URL records.")
+    except Exception as exc:
+        print(f"[Tracker API] Startup cleanup notice: {exc}")
+    yield
+
+
+app = FastAPI(title="Tracker API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

@@ -231,3 +231,34 @@ def test_user_isolation(client: TestClient) -> None:
     apps_res = client.get("/dashboard/apps", headers=headers)
     assert apps_res.status_code == 200
     assert apps_res.json()["items"] == []
+
+
+def test_dashboard_browser_excludes_project_urls(client: TestClient, test_user_and_headers: dict[str, Any]) -> None:
+    """Ensure localhost project URLs are excluded from browser dashboard and history."""
+    headers = test_user_and_headers["headers"]
+    user_id = test_user_and_headers["user_id"]
+
+    # Directly insert a legacy project URL record into the database
+    with SessionLocal() as db:
+        legacy_rec = BrowserActivity(
+            user_id=user_id,
+            browser="Chrome",
+            url="http://localhost:5173/dashboard",
+            title="Traceo Dashboard",
+            timestamp=datetime.now(timezone.utc),
+        )
+        db.add(legacy_rec)
+        db.commit()
+
+    # Browser history should purge/exclude it
+    res_history = client.get("/dashboard/browser-history", headers=headers)
+    assert res_history.status_code == 200
+    history_urls = [item["url"] for item in res_history.json()["items"]]
+    assert not any("localhost:5173" in u for u in history_urls)
+
+    # Top visited domains should also exclude it
+    res_browser = client.get("/dashboard/browser", headers=headers)
+    assert res_browser.status_code == 200
+    domains = [item["domain"] for item in res_browser.json()["items"]]
+    assert "localhost:5173" not in domains
+    assert "localhost" not in domains
