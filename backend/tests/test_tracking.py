@@ -105,6 +105,22 @@ def test_track_app_usage_batch(client: TestClient, auth_headers: dict[str, str])
     assert data[1]["duration_seconds"] == 1500
 
 
+def test_track_app_usage_long_title_sanitization(client: TestClient, auth_headers: dict[str, str]) -> None:
+    """Test POST /track/app-usage with window title exceeding 512 chars is automatically truncated without 422."""
+    start_time = datetime(2026, 9, 18, 12, 0, 0, tzinfo=timezone.utc)
+    long_title = "https://accounts.google.com/oauth?" + "a" * 1500
+    payload = {
+        "app_name": "Google Chrome",
+        "window_title": long_title,
+        "start_time": start_time.isoformat(),
+        "end_time": (start_time + timedelta(seconds=60)).isoformat(),
+    }
+    response = client.post("/track/app-usage", headers=auth_headers, json=payload)
+    assert response.status_code == 201
+    data = response.json()
+    assert len(data["window_title"]) <= 512
+
+
 def test_track_browser_activity(client: TestClient, auth_headers: dict[str, str]) -> None:
     """Test POST /track/browser-activity from Chrome extension."""
     payload = {

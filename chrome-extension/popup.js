@@ -63,6 +63,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   /**
+   * Safely format any error response or syncStatus value to a human-readable string.
+   */
+  function formatErrorMessage(detail, fallback = "Unknown error") {
+    if (!detail) return fallback;
+    if (typeof detail === "string") return detail;
+    if (Array.isArray(detail)) {
+      return detail
+        .map((e) => (typeof e === "string" ? e : (e.msg || e.message || JSON.stringify(e))))
+        .join("; ");
+    }
+    if (typeof detail === "object") {
+      return detail.msg || detail.message || JSON.stringify(detail);
+    }
+    return String(detail);
+  }
+
+  /**
    * Check Incognito support permission per Chrome extension rules.
    */
   function checkIncognitoSupport() {
@@ -182,92 +199,108 @@ document.addEventListener("DOMContentLoaded", async () => {
    * Refresh all UI state from chrome.storage.local.
    */
   async function refreshUI() {
-    const data = await chrome.storage.local.get([
-      "apiUrl",
-      "token",
-      "refreshToken",
-      "authState",
-      "userEmail",
-      "trackingEnabled",
-      "eventQueue",
-      "recentVisits",
-      "lastSyncTime",
-      "syncStatus",
-    ]);
+    try {
+      const data = await chrome.storage.local.get([
+        "apiUrl",
+        "token",
+        "refreshToken",
+        "authState",
+        "userEmail",
+        "trackingEnabled",
+        "eventQueue",
+        "recentVisits",
+        "lastSyncTime",
+        "syncStatus",
+      ]);
 
-    const sessionExpired = data.authState === "expired";
-    const loggedIn = Boolean(data.token) && !sessionExpired;
+      const sessionExpired = data.authState === "expired";
+      const loggedIn = Boolean(data.token) && !sessionExpired;
 
-    // Master Tracking Switch
-    const isTracking = data.trackingEnabled !== false;
-    trackingToggle.checked = isTracking;
+      // Master Tracking Switch
+      const isTracking = data.trackingEnabled !== false;
+      trackingToggle.checked = isTracking;
 
-    // Queue count
-    const queue = data.eventQueue || [];
-    queueBadge.textContent = `${queue.length} buffered`;
+      // Queue count
+      const queue = data.eventQueue || [];
+      queueBadge.textContent = `${queue.length} buffered`;
 
-    // Last Sync time
-    if (data.lastSyncTime) {
-      lastSyncTimeEl.textContent = `Synced ${formatTimestamp(data.lastSyncTime)}`;
-    } else {
-      lastSyncTimeEl.textContent = "Never synced";
-    }
-
-    // Last sync error line
-    const okStatuses = ["Ready", "Synced", "Syncing..."];
-    if (data.syncStatus && !okStatuses.includes(data.syncStatus) && !sessionExpired) {
-      syncErrorEl.textContent = data.syncStatus;
-      syncErrorEl.style.display = "block";
-    } else {
-      syncErrorEl.style.display = "none";
-    }
-
-    // Session expired banner
-    sessionBanner.style.display = sessionExpired ? "block" : "none";
-
-    // Status Dot & Text
-    if (sessionExpired) {
-      statusDot.className = "status-dot error";
-      statusText.textContent = "Session Expired";
-    } else if (!isTracking) {
-      statusDot.className = "status-dot warning";
-      statusText.textContent = "Tracking Paused";
-    } else if (!data.token) {
-      statusDot.className = "status-dot error";
-      statusText.textContent = "Login Required";
-    } else if (data.syncStatus === "Syncing...") {
-      statusDot.className = "status-dot active";
-      statusText.textContent = "Syncing...";
-    } else if (data.syncStatus && data.syncStatus.startsWith("Network Error")) {
-      statusDot.className = "status-dot error";
-      statusText.textContent = "Offline / Error";
-    } else {
-      statusDot.className = "status-dot active";
-      statusText.textContent = "Active & Logging";
-    }
-
-    // Auth state view
-    if (loggedIn) {
-      loggedInView.style.display = "block";
-      loggedOutView.style.display = "none";
-      userEmailEl.textContent = data.userEmail || "Authenticated User";
-    } else {
-      loggedInView.style.display = "none";
-      loggedOutView.style.display = "block";
-      if (data.apiUrl) {
-        apiUrlInput.value = data.apiUrl;
+      // Last Sync time
+      if (data.lastSyncTime) {
+        lastSyncTimeEl.textContent = `Synced ${formatTimestamp(data.lastSyncTime)}`;
+      } else {
+        lastSyncTimeEl.textContent = "Never synced";
       }
-      // Prefill email when the session expired so re-login is quick
-      if (sessionExpired && data.userEmail && !loginEmail.value) {
-        loginEmail.value = data.userEmail;
+
+      // Last sync error line
+      const okStatuses = ["Ready", "Synced", "Syncing..."];
+      const syncStatusStr = formatErrorMessage(data.syncStatus, "");
+      const isSyncError = Boolean(
+        data.syncStatus &&
+        !okStatuses.includes(data.syncStatus) &&
+        !sessionExpired
+      );
+
+      if (isSyncError) {
+        syncErrorEl.textContent = syncStatusStr;
+        syncErrorEl.style.display = "block";
+      } else {
+        syncErrorEl.style.display = "none";
+      }
+
+      // Session expired banner
+      sessionBanner.style.display = sessionExpired ? "block" : "none";
+
+      // Status Dot & Text
+      if (sessionExpired) {
+        statusDot.className = "status-dot error";
+        statusText.textContent = "Session Expired";
+      } else if (!isTracking) {
+        statusDot.className = "status-dot warning";
+        statusText.textContent = "Tracking Paused";
+      } else if (!data.token) {
+        statusDot.className = "status-dot error";
+        statusText.textContent = "Login Required";
+      } else if (syncStatusStr === "Syncing...") {
+        statusDot.className = "status-dot active";
+        statusText.textContent = "Syncing...";
+      } else if (syncStatusStr.startsWith("Network Error") || isSyncError) {
+        statusDot.className = "status-dot error";
+        statusText.textContent = syncStatusStr.startsWith("Network Error") ? "Offline / Error" : "Sync Error";
+      } else {
+        statusDot.className = "status-dot active";
+        statusText.textContent = "Active & Logging";
+      }
+
+      // Auth state view
+      if (loggedIn) {
+        loggedInView.style.display = "block";
+        loggedOutView.style.display = "none";
+        userEmailEl.textContent = data.userEmail || "Authenticated User";
+      } else {
+        loggedInView.style.display = "none";
+        loggedOutView.style.display = "block";
+        if (data.apiUrl) {
+          apiUrlInput.value = data.apiUrl;
+        }
+        // Prefill email when the session expired so re-login is quick
+        if (sessionExpired && data.userEmail && !loginEmail.value) {
+          loginEmail.value = data.userEmail;
+        }
+      }
+
+      // Recent visits feed
+      renderVisits(data.recentVisits || []);
+
+      // Check Incognito permission status
+      checkIncognitoSupport();
+    } catch (err) {
+      console.error("[Popup] refreshUI encountered an error:", err);
+      try {
+        checkIncognitoSupport();
+      } catch {
+        // ignore
       }
     }
-
-    // Recent visits feed
-    renderVisits(data.recentVisits || []);
-
-    // Check Incognito permission status
-    checkIncognitoSupport();
   }
 
   // Initial load
@@ -343,7 +376,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || `Login failed (${response.status})`);
+        throw new Error(formatErrorMessage(errorData.detail, `Login failed (${response.status})`));
       }
 
       const data = await response.json();

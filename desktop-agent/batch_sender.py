@@ -132,7 +132,15 @@ class BatchSender:
             print("[BatchSender] Skipping flush: unable to acquire valid authorization token.")
             return 0
 
-        batch_to_send = list(self.queue)
+        batch_to_send = []
+        for r in self.queue:
+            item = dict(r)
+            if item.get("window_title"):
+                item["window_title"] = str(item["window_title"]).strip()[:512]
+            if item.get("app_name"):
+                item["app_name"] = str(item["app_name"]).strip()[:255]
+            batch_to_send.append(item)
+
         endpoint = f"{self.config.backend_url.rstrip('/')}/track/app-usage"
         headers = {
             "Authorization": f"Bearer {token}",
@@ -184,6 +192,16 @@ class BatchSender:
                     file=sys.stderr,
                 )
                 # Drop batch to prevent infinite loop if permissions are off
+                self.queue = self.queue[len(batch_to_send):]
+                self._save_buffer()
+                self.last_flush_time = time.time()
+                return 0
+
+            elif status_code == 422:
+                print(
+                    f"[BatchSender] Backend rejected batch with HTTP 422: {response_text}. Dropping invalid records.",
+                    file=sys.stderr,
+                )
                 self.queue = self.queue[len(batch_to_send):]
                 self._save_buffer()
                 self.last_flush_time = time.time()

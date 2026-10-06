@@ -242,7 +242,8 @@ async function enqueueBrowserVisit(tab, triggerType = "update") {
   // Update in-memory tab state
   lastTabState.set(tab.id, { url, timestamp: now });
 
-  const cleanTitle = tabTitle || new URL(url).hostname;
+  const rawTitle = tabTitle || (isValidWebUrl(url) ? new URL(url).hostname : "Untitled");
+  const cleanTitle = String(rawTitle).trim().slice(0, 1024);
   const timestampIso = new Date(now).toISOString();
 
   const eventItem = {
@@ -340,11 +341,16 @@ async function flushQueue() {
 
     await chrome.storage.local.set({ syncStatus: "Syncing..." });
 
+    const payload = batch.map(({ browser, url, title, timestamp }) => ({
+      browser: browser ? String(browser).slice(0, 100) : "Chrome",
+      url: String(url),
+      title: title ? String(title).slice(0, 1024) : null,
+      timestamp: timestamp || new Date().toISOString(),
+    }));
+
     const res = await authFetch("/track/browser-activity", {
       method: "POST",
-      body: JSON.stringify(
-        batch.map(({ browser, url, title, timestamp }) => ({ browser, url, title, timestamp }))
-      ),
+      body: JSON.stringify(payload),
     });
 
     if (res.status === 201) {
@@ -361,7 +367,16 @@ async function flushQueue() {
     }
 
     const errData = await res.json().catch(() => ({}));
-    const msg = errData.detail || `Server Error (${res.status})`;
+    let msg = `Server Error (${res.status})`;
+    if (typeof errData.detail === "string") {
+      msg = errData.detail;
+    } else if (Array.isArray(errData.detail)) {
+      msg = errData.detail
+        .map((e) => (typeof e === "string" ? e : (e.msg || e.message || JSON.stringify(e))))
+        .join("; ");
+    } else if (errData.detail && typeof errData.detail === "object") {
+      msg = errData.detail.msg || errData.detail.message || JSON.stringify(errData.detail);
+    }
     console.warn(`[Tracker] Server rejected sync (${res.status}): ${msg}`);
     await chrome.storage.local.set({ syncStatus: msg });
     return { success: false, error: msg };
@@ -444,7 +459,7 @@ async function handleYouTubeSession(data) {
           {
             browser: "Chrome",
             url: data.url,
-            title: videoTitle,
+            title: videoTitle ? String(videoTitle).slice(0, 1024) : null,
             timestamp: data.timestamp || new Date().toISOString(),
           },
         ]),

@@ -45,9 +45,11 @@ class DesktopAgent:
         duration_seconds = int((now - self.current_start_time).total_seconds())
 
         if duration_seconds >= self.config.min_duration_seconds:
+            clean_title = (self.current_window_title or "").strip()[:512] if self.current_window_title else None
+            clean_app = (self.current_app_name or "Unknown").strip()[:255]
             record = {
-                "app_name": self.current_app_name,
-                "window_title": self.current_window_title,
+                "app_name": clean_app,
+                "window_title": clean_title,
                 "start_time": self.current_start_time.isoformat(),
                 "end_time": now.isoformat(),
                 "duration_seconds": duration_seconds,

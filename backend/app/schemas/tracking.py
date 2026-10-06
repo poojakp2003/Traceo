@@ -1,17 +1,31 @@
 from datetime import datetime, timezone
 from typing import Self
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class AppUsageCreate(BaseModel):
     """Schema for recording an application usage event."""
 
-    app_name: str = Field(min_length=1, max_length=255)
-    window_title: str | None = Field(default=None, max_length=512)
+    app_name: str = Field(default="Unknown Application", max_length=255)
+    window_title: str | None = Field(default=None)
     start_time: datetime
     end_time: datetime
     duration_seconds: int | None = Field(default=None, ge=0)
+
+    @field_validator("window_title", mode="before")
+    @classmethod
+    def sanitize_window_title(cls, v: object) -> str | None:
+        if v is None:
+            return None
+        s = str(v).strip()
+        return s[:512]
+
+    @field_validator("app_name", mode="before")
+    @classmethod
+    def sanitize_app_name(cls, v: object) -> str:
+        s = str(v or "").strip() or "Unknown Application"
+        return s[:255]
 
     @model_validator(mode="after")
     def compute_duration(self) -> Self:
@@ -39,10 +53,26 @@ class AppUsageResponse(BaseModel):
 class BrowserActivityCreate(BaseModel):
     """Schema for recording a browser page visit."""
 
-    browser: str = Field(min_length=1, max_length=100)
+    browser: str = Field(default="Chrome", max_length=100)
     url: str = Field(min_length=1)
-    title: str | None = Field(default=None, max_length=1024)
+    title: str | None = Field(default=None)
     timestamp: datetime | None = None
+
+    @field_validator("title", mode="before")
+    @classmethod
+    def sanitize_title(cls, v: object) -> str | None:
+        if v is None:
+            return None
+        s = str(v).strip()
+        return s[:1024]
+
+    @field_validator("browser", mode="before")
+    @classmethod
+    def sanitize_browser(cls, v: object) -> str:
+        if not v:
+            return "Chrome"
+        s = str(v).strip()
+        return s[:100] if s else "Chrome"
 
     @model_validator(mode="after")
     def default_timestamp(self) -> Self:
