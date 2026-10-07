@@ -274,6 +274,9 @@ input:checked + .slider:before {
 }
 
 .queue-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: var(--bg-card-subtle);
   color: var(--text-muted);
   border: 1px solid var(--border-color);
@@ -281,6 +284,8 @@ input:checked + .slider:before {
   padding: 2px 8px;
   border-radius: 12px;
   font-weight: 500;
+  transform-origin: center;
+  will-change: transform;
 }
 
 .sync-actions {
@@ -361,13 +366,13 @@ input:checked + .slider:before {
   cursor: wait;
   background: linear-gradient(135deg, #2563eb, #3b82f6, #60a5fa, #2563eb);
   background-size: 250% 100%;
-  animation: syncShimmer 1.4s ease infinite;
+  animation: syncShimmer 2.2s ease infinite;
   box-shadow: 0 0 16px rgba(59, 130, 246, 0.55);
 }
 
 #sync-now-btn.is-syncing svg,
 #sync-now-btn .sync-spinner {
-  animation: syncRotate 0.75s linear infinite;
+  animation: syncRotate 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 @keyframes syncRotate {
@@ -388,38 +393,46 @@ input:checked + .slider:before {
   }
 }
 
-/* Synced / Success State: rich emerald green burst + checkmark */
+/* Synced / Success State: smooth rich emerald green burst + checkmark */
 #sync-now-btn.is-synced {
   background-color: #10b981 !important;
   color: #ffffff;
-  box-shadow: 0 0 18px rgba(16, 185, 129, 0.6);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.65);
   transform: scale(1.02);
-  animation: syncSuccessPulse 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: syncSuccessPulse 0.9s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes syncSuccessPulse {
   0% {
-    transform: scale(0.95);
+    transform: scale(0.96);
     box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
   }
-  50% {
-    transform: scale(1.04);
-    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  35% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+  70% {
+    transform: scale(1.01);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
   }
   100% {
-    transform: scale(1.02);
-    box-shadow: 0 0 18px rgba(16, 185, 129, 0.6);
+    transform: scale(1);
+    box-shadow: 0 0 16px rgba(16, 185, 129, 0.5);
   }
 }
 
 #sync-now-btn.is-synced svg {
-  animation: syncCheckmarkPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: syncCheckmarkPop 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes syncCheckmarkPop {
   0% {
-    transform: scale(0.4) rotate(-20deg);
+    transform: scale(0.3) rotate(-25deg);
     opacity: 0;
+  }
+  50% {
+    transform: scale(1.15) rotate(4deg);
+    opacity: 1;
   }
   100% {
     transform: scale(1) rotate(0deg);
@@ -430,7 +443,7 @@ input:checked + .slider:before {
 /* Error State */
 #sync-now-btn.is-error {
   background-color: #ef4444 !important;
-  animation: syncShake 0.4s ease;
+  animation: syncShake 0.5s ease;
   box-shadow: 0 0 14px rgba(239, 68, 68, 0.5);
 }
 
@@ -440,15 +453,40 @@ input:checked + .slider:before {
   40%, 80% { transform: translateX(4px); }
 }
 
-/* Queue badge update pop animation */
+/* Queue badge gentle slow small pop animation */
 .queue-badge.badge-pop {
-  animation: badgePopAnim 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: badgePopAnim 1.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 @keyframes badgePopAnim {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.25); color: #34d399; border-color: rgba(16, 185, 129, 0.5); }
-  100% { transform: scale(1); }
+  0% {
+    transform: translateY(0) scale(1);
+    color: var(--text-muted);
+    background-color: var(--bg-card-subtle);
+    border-color: var(--border-color);
+    box-shadow: none;
+  }
+  35% {
+    transform: translateY(-1.5px) scale(1.14);
+    color: #34d399;
+    background-color: rgba(16, 185, 129, 0.16);
+    border-color: rgba(16, 185, 129, 0.6);
+    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.35);
+  }
+  70% {
+    transform: translateY(-0.5px) scale(1.05);
+    color: #34d399;
+    background-color: rgba(16, 185, 129, 0.08);
+    border-color: rgba(16, 185, 129, 0.35);
+    box-shadow: 0 1px 6px rgba(16, 185, 129, 0.2);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    color: var(--text-muted);
+    background-color: var(--bg-card-subtle);
+    border-color: var(--border-color);
+    box-shadow: none;
+  }
 }
 
 .btn-subtle {

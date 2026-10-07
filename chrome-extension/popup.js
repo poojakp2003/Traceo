@@ -366,10 +366,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       syncError = true;
     }
 
-    // Ensure animation spins for at least 700ms so the user sees a smooth, satisfying rotation
+    // Ensure animation spins for at least 1500ms so the user sees a slow, smooth, satisfying rotation
     const elapsed = Date.now() - startTime;
-    if (elapsed < 700) {
-      await new Promise((r) => setTimeout(r, 700 - elapsed));
+    if (elapsed < 1500) {
+      await new Promise((r) => setTimeout(r, 1500 - elapsed));
     }
 
     syncNowBtn.classList.remove("is-syncing");
@@ -396,13 +396,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         queueBadge.classList.remove("badge-pop");
         void queueBadge.offsetWidth; // trigger reflow
         queueBadge.classList.add("badge-pop");
+        setTimeout(() => {
+          queueBadge.classList.remove("badge-pop");
+        }, 1500);
       }
     }
 
     // Refresh UI data
     await refreshUI();
 
-    // Revert back to default state after 1000ms
+    // Revert back to default state after 2200ms
     setTimeout(() => {
       syncNowBtn.classList.remove("is-synced", "is-error");
       syncNowBtn.disabled = false;
@@ -414,12 +417,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         </svg>
         <span>Sync Now</span>
       `;
-    }, 1000);
+    }, 2200);
   });
 
   // Clear Queue Button
   clearQueueBtn.addEventListener("click", async () => {
     await chrome.runtime.sendMessage({ action: "CLEAR_QUEUE" });
+    if (queueBadge) {
+      queueBadge.classList.remove("badge-pop");
+      void queueBadge.offsetWidth;
+      queueBadge.classList.add("badge-pop");
+      setTimeout(() => {
+        queueBadge.classList.remove("badge-pop");
+      }, 1500);
+    }
     await refreshUI();
   });
 
