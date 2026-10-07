@@ -10,8 +10,8 @@ export const getDashboardApps = async (range = "7d") => {
   return response.data;
 };
 
-export const getDashboardBrowser = async (range = "7d") => {
-  const response = await apiClient.get(`/dashboard/browser?range=${range}`);
+export const getDashboardBrowser = async (range = "7d", limit = 100) => {
+  const response = await apiClient.get(`/dashboard/browser?range=${range}&limit=${limit}`);
   return response.data;
 };
 
