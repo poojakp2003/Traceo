@@ -10,6 +10,24 @@ import {
 } from "recharts";
 import { Calendar, TrendingUp } from "lucide-react";
 
+// Helper to format date string into DD/MM format (e.g., "2026-10-07" -> "07/10")
+const formatDateToDayMonth = (dateStr) => {
+  if (!dateStr) return "";
+  const match = String(dateStr).match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (match) {
+    const month = match[2].padStart(2, "0");
+    const day = match[3].padStart(2, "0");
+    return `${day}/${month}`;
+  }
+  const parsed = new Date(dateStr);
+  if (!isNaN(parsed.getTime())) {
+    const day = String(parsed.getDate()).padStart(2, "0");
+    const month = String(parsed.getMonth() + 1).padStart(2, "0");
+    return `${day}/${month}`;
+  }
+  return String(dateStr);
+};
+
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
@@ -27,7 +45,7 @@ const CustomTooltip = ({ active, payload, label }) => {
         }}
       >
         <div style={{ fontWeight: 600, fontSize: "0.95rem", marginBottom: "4px" }}>
-          {data.day}
+          {data.day ? `${data.day} (${data.displayLabel})` : data.displayLabel}
         </div>
         <div style={{ color: "#94A3B8", fontSize: "0.75rem", marginBottom: "6px" }}>
           {data.date}
@@ -67,12 +85,12 @@ export const UsageTimeLineChart = ({ items = [], totalHours = 0, range = "7d" })
     );
   }
 
-  // Format short day for X-Axis (e.g. Mon, Tue or Mon 15)
+  // Format date for X-Axis as DD/MM (e.g. 07/10)
   const chartData = items.map((point) => {
-    const shortDay = point.day ? point.day.substring(0, 3) : point.date;
+    const formattedDate = formatDateToDayMonth(point.date);
     return {
       ...point,
-      displayLabel: shortDay,
+      displayLabel: formattedDate || (point.day ? point.day.substring(0, 3) : ""),
     };
   });
 
