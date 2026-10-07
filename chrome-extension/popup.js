@@ -339,15 +339,72 @@ document.addEventListener("DOMContentLoaded", async () => {
     await refreshUI();
   });
 
-  // Manual Sync Button
+  // Manual Sync Button with smooth reload animation
   syncNowBtn.addEventListener("click", async () => {
+    if (syncNowBtn.disabled) return;
+
     syncNowBtn.disabled = true;
-    syncNowBtn.textContent = "Syncing...";
+    syncNowBtn.classList.remove("is-synced", "is-error");
+    syncNowBtn.classList.add("is-syncing");
+    syncNowBtn.innerHTML = `
+      <svg class="sync-spinner" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-1.19"/>
+      </svg>
+      <span>Syncing...</span>
+    `;
+
+    const startTime = Date.now();
+    let syncError = false;
+
     try {
-      await chrome.runtime.sendMessage({ action: "SYNC_NOW" });
+      const response = await chrome.runtime.sendMessage({ action: "SYNC_NOW" });
+      if (response && response.success === false) {
+        syncError = true;
+      }
     } catch (err) {
       console.warn("Sync message error:", err);
-    } finally {
+      syncError = true;
+    }
+
+    // Ensure animation spins for at least 700ms so the user sees a smooth, satisfying rotation
+    const elapsed = Date.now() - startTime;
+    if (elapsed < 700) {
+      await new Promise((r) => setTimeout(r, 700 - elapsed));
+    }
+
+    syncNowBtn.classList.remove("is-syncing");
+
+    if (syncError) {
+      syncNowBtn.classList.add("is-error");
+      syncNowBtn.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span>Error</span>
+      `;
+    } else {
+      syncNowBtn.classList.add("is-synced");
+      syncNowBtn.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span>Synced!</span>
+      `;
+      if (queueBadge) {
+        queueBadge.classList.remove("badge-pop");
+        void queueBadge.offsetWidth; // trigger reflow
+        queueBadge.classList.add("badge-pop");
+      }
+    }
+
+    // Refresh UI data
+    await refreshUI();
+
+    // Revert back to default state after 1000ms
+    setTimeout(() => {
+      syncNowBtn.classList.remove("is-synced", "is-error");
       syncNowBtn.disabled = false;
       syncNowBtn.innerHTML = `
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -355,10 +412,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           <polyline points="23 20 23 14 17 14"></polyline>
           <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
         </svg>
-        Sync Now
+        <span>Sync Now</span>
       `;
-      await refreshUI();
-    }
+    }, 1000);
   });
 
   // Clear Queue Button
