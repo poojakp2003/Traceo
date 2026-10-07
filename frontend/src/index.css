@@ -35,6 +35,14 @@
   
   --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
   --shadow-glow: 0 0 20px var(--primary-glow);
+
+  --pagination-emerald-bg: rgba(16, 185, 129, 0.2);
+  --pagination-emerald-border: rgba(16, 185, 129, 0.5);
+  --pagination-emerald-color: #34D399;
+
+  --pagination-rose-bg: rgba(244, 63, 94, 0.2);
+  --pagination-rose-border: rgba(244, 63, 94, 0.5);
+  --pagination-rose-color: #FB7185;
 }
 
 [data-theme="light"] {
@@ -63,6 +71,14 @@
   
   --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.06), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
   --shadow-glow: 0 0 20px rgba(8, 145, 178, 0.12);
+
+  --pagination-emerald-bg: rgba(5, 150, 105, 0.14);
+  --pagination-emerald-border: rgba(5, 150, 105, 0.35);
+  --pagination-emerald-color: #059669;
+
+  --pagination-rose-bg: rgba(225, 29, 72, 0.14);
+  --pagination-rose-border: rgba(225, 29, 72, 0.35);
+  --pagination-rose-color: #E11D48;
 }
 
 * {
