@@ -3,7 +3,6 @@ import {
   Activity,
   Calendar,
   Clock,
-  Compass,
   Flame,
   Globe,
   Layers,
@@ -26,6 +25,7 @@ import { RangeSelector } from "../components/RangeSelector";
 import { StatCard } from "../components/StatCard";
 import { UsageTimeLineChart } from "../components/UsageTimeLineChart";
 import { YouTubeActivityList } from "../components/YouTubeActivityList";
+import { TopVisitedDomains } from "../components/TopVisitedDomains";
 
 export const DashboardPage = () => {
   const [range, setRange] = useState("today");
@@ -311,131 +311,10 @@ export const DashboardPage = () => {
         </div>
 
         {/* 4. Top Browser Domains Summary */}
-        {(() => {
-          const isProjectDomain = (domain = "") => {
-            if (!domain) return false;
-            const lower = domain.toLowerCase();
-            return (
-              lower.includes("localhost:5173") ||
-              lower.includes("127.0.0.1:5173") ||
-              lower.includes("localhost:8000") ||
-              lower.includes("127.0.0.1:8000") ||
-              lower.includes("localhost:3000") ||
-              lower.includes("127.0.0.1:3000")
-            );
-          };
-          const validDomains = (browserData?.items || []).filter((b) => !isProjectDomain(b.domain));
-          if (!browserData || validDomains.length === 0) return null;
-
-          return (
-            <div className="glass-card" style={{ padding: "24px" }}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginBottom: "16px",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <div
-                    style={{
-                      width: "34px",
-                      height: "34px",
-                      borderRadius: "8px",
-                      background: "rgba(16, 185, 129, 0.15)",
-                      color: "#34D399",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Compass size={18} />
-                  </div>
-                  <div>
-                    <h2 style={{ fontSize: "1.15rem" }}>Top Visited Domains</h2>
-                    <p style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>
-                      Aggregate web traffic by host domain ({validDomains.reduce((acc, curr) => acc + (curr.visit_count || 0), 0)} total visits)
-                    </p>
-                  </div>
-                </div>
-                <span className="badge badge-emerald">{range.toUpperCase()}</span>
-              </div>
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-                  gap: "12px",
-                  alignItems: "stretch",
-                }}
-              >
-                {validDomains.map((b, idx) => (
-                  <div
-                    key={idx}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: "10px",
-                      minWidth: 0,
-                      minHeight: "52px",
-                      padding: "10px 14px",
-                      background: "rgba(255, 255, 255, 0.025)",
-                      border: "1px solid var(--border-subtle)",
-                      borderRadius: "var(--radius-md)",
-                    }}
-                  >
-                    <span
-                      title={b.domain}
-                      style={{
-                        fontWeight: 500,
-                        fontSize: "0.88rem",
-                        minWidth: 0,
-                        flex: 1,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {b.domain}
-                    </span>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <span
-                        style={{
-                          color: "var(--text-secondary)",
-                          fontSize: "0.82rem",
-                          fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
-                          fontVariantNumeric: "tabular-nums",
-                          fontWeight: 500,
-                        }}
-                      >
-                        {b.visit_count}
-                      </span>
-                      <span
-                        className="badge badge-emerald"
-                        style={{
-                          fontSize: "0.72rem",
-                          fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
-                          fontVariantNumeric: "tabular-nums",
-                        }}
-                      >
-                        {b.percentage}%
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })()}
+        <TopVisitedDomains
+          browserData={browserData}
+          range={range}
+        />
       </main>
     </div>
   );
