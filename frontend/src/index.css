@@ -24,9 +24,9 @@
   --accent-amber: #F59E0B;
   --accent-rose: #F43F5E;
   
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-heading: 'Outfit', sans-serif;
-  --font-satoshi: 'Satoshi', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-satoshi: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -85,10 +85,11 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  font-family: var(--font-satoshi);
 }
 
 body {
-  font-family: var(--font-sans);
+  font-family: var(--font-satoshi);
   background-color: var(--bg-main);
   background-image: 
     radial-gradient(circle at 15% 15%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
@@ -98,7 +99,12 @@ body {
   min-height: 100vh;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.7s cubic-bezier(0.4, 0, 0.2, 1), color 0.55s ease;
+}
+
+button, input, select, textarea {
+  font-family: var(--font-satoshi);
 }
 
 [data-theme="light"] body {
@@ -110,8 +116,8 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading);
-  font-weight: 600;
+  font-family: var(--font-satoshi);
+  font-weight: 700;
   letter-spacing: -0.02em;
   transition: color 0.5s ease;
 }
