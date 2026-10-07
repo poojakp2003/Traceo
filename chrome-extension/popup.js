@@ -44,7 +44,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     "display:none;margin:8px 12px;padding:8px 10px;border-radius:8px;" +
     "background:rgba(225,29,72,0.15);border:1px solid rgba(225,29,72,0.5);" +
     "color:#fda4af;font-size:12px;line-height:1.4;";
-  document.body.prepend(sessionBanner);
+  const container = document.querySelector(".extension-container") || document.body;
+  container.prepend(sessionBanner);
 
   // Small line under "Last synced" that shows the latest sync error
   const syncErrorEl = document.createElement("div");
