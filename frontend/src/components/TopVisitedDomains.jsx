@@ -19,27 +19,48 @@ const isProjectDomain = (domain = "") => {
 export const TopVisitedDomains = ({ browserData = null, items = null, range = "today" }) => {
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Reset to page 1 whenever the time range changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [range]);
-
   const rawItems = items || browserData?.items || [];
   const validDomains = rawItems.filter((b) => !isProjectDomain(b.domain));
 
-  if (!browserData && !items) return null;
-  if (validDomains.length === 0) return null;
+  // Keep the domains sorted by visit count in descending order across all pages
+  const sortedDomains = [...validDomains].sort((a, b) => {
+    const countA = Number(a.visit_count) || 0;
+    const countB = Number(b.visit_count) || 0;
+    if (countB !== countA) {
+      return countB - countA;
+    }
+    return String(a.domain || "").localeCompare(String(b.domain || ""));
+  });
 
-  const totalVisits = validDomains.reduce((acc, curr) => acc + (curr.visit_count || 0), 0);
-
-  const totalPages = Math.ceil(validDomains.length / PAGE_SIZE) || 1;
+  const totalPages = Math.max(1, Math.ceil(sortedDomains.length / PAGE_SIZE));
   const safePage = Math.min(Math.max(1, currentPage), totalPages);
+
+  // Reset to page 1 whenever the data or the time filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [range, browserData, items]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(1);
+    }
+  }, [totalPages, currentPage]);
+
+  if (!browserData && !items) return null;
+  if (sortedDomains.length === 0) return null;
+
+  const totalVisits = sortedDomains.reduce((acc, curr) => acc + (Number(curr.visit_count) || 0), 0);
+
   const startIndex = (safePage - 1) * PAGE_SIZE;
-  const endIndex = Math.min(startIndex + PAGE_SIZE, validDomains.length);
-  const paginatedDomains = validDomains.slice(startIndex, startIndex + PAGE_SIZE);
+  const endIndex = Math.min(startIndex + PAGE_SIZE, sortedDomains.length);
+  const paginatedDomains = sortedDomains.slice(startIndex, startIndex + PAGE_SIZE);
+
+  const firstItem = sortedDomains.length === 0 ? 0 : startIndex + 1;
+  const lastItem = endIndex;
+  const totalCount = sortedDomains.length;
 
   const getPageNumbers = () => {
-    if (totalPages <= 4) {
+    if (totalPages <= 5) {
       return Array.from({ length: totalPages }, (_, i) => i + 1);
     }
     if (safePage <= 3) {
@@ -88,80 +109,82 @@ export const TopVisitedDomains = ({ browserData = null, items = null, range = "t
       </div>
 
       {/* Grid of Domains */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-          gap: "12px",
-          alignItems: "stretch",
-        }}
-      >
-        {paginatedDomains.map((b, idx) => (
-          <div
-            key={b.domain || idx}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "10px",
-              minWidth: 0,
-              minHeight: "52px",
-              padding: "10px 14px",
-              background: "rgba(255, 255, 255, 0.025)",
-              border: "1px solid var(--border-subtle)",
-              borderRadius: "var(--radius-md)",
-            }}
-          >
-            <span
-              title={b.domain}
-              style={{
-                fontWeight: 500,
-                fontSize: "0.88rem",
-                minWidth: 0,
-                flex: 1,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {b.domain}
-            </span>
+      <div className="top-domains-grid">
+        {paginatedDomains.map((b, idx) => {
+          const displayPercentage =
+            b.percentage !== undefined && b.percentage !== null
+              ? `${String(b.percentage).replace(/%$/, "")}%`
+              : totalVisits > 0
+              ? `${(((Number(b.visit_count) || 0) / totalVisits) * 100).toFixed(1)}%`
+              : "0%";
+
+          return (
             <div
+              key={b.domain || idx}
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "8px",
-                flexShrink: 0,
+                justifyContent: "space-between",
+                gap: "10px",
+                minWidth: 0,
+                minHeight: "52px",
+                padding: "10px 14px",
+                background: "rgba(255, 255, 255, 0.025)",
+                border: "1px solid var(--border-subtle)",
+                borderRadius: "var(--radius-md)",
               }}
             >
               <span
+                title={b.domain}
                 style={{
-                  color: "var(--text-secondary)",
-                  fontSize: "0.82rem",
-                  fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
-                  fontVariantNumeric: "tabular-nums",
                   fontWeight: 500,
+                  fontSize: "0.88rem",
+                  minWidth: 0,
+                  flex: 1,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
                 }}
               >
-                {b.visit_count}
+                {b.domain}
               </span>
-              <span
-                className="badge badge-emerald"
+              <div
                 style={{
-                  fontSize: "0.72rem",
-                  fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
-                  fontVariantNumeric: "tabular-nums",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  flexShrink: 0,
                 }}
               >
-                {b.percentage}%
-              </span>
+                <span
+                  style={{
+                    color: "var(--text-secondary)",
+                    fontSize: "0.82rem",
+                    fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
+                    fontVariantNumeric: "tabular-nums",
+                    fontWeight: 500,
+                  }}
+                >
+                  {b.visit_count}
+                </span>
+                <span
+                  className="badge badge-emerald"
+                  style={{
+                    fontSize: "0.72rem",
+                    fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
+                    fontVariantNumeric: "tabular-nums",
+                  }}
+                >
+                  {displayPercentage}
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Pagination Controls */}
-      {validDomains.length > 0 && (
+      {sortedDomains.length > 0 && (
         <div
           style={{
             display: "flex",
@@ -188,26 +211,16 @@ export const TopVisitedDomains = ({ browserData = null, items = null, range = "t
             }}
           >
             Showing{" "}
-            {validDomains.length === 0 ? (
-              <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>0</span>
-            ) : startIndex + 1 >= endIndex ? (
-              <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
-                {endIndex}
-              </span>
-            ) : (
-              <>
-                <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
-                  {startIndex + 1}
-                </span>
-                {"–"}
-                <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
-                  {endIndex}
-                </span>
-              </>
-            )}{" "}
+            <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
+              {firstItem}
+            </span>
+            -
+            <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
+              {lastItem}
+            </span>{" "}
             of{" "}
             <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
-              {validDomains.length}
+              {totalCount}
             </span>{" "}
             visited domains
           </div>
