@@ -116,7 +116,6 @@ export const DashboardPage = () => {
               onClick={() => fetchData(true)}
               disabled={refreshing}
               className={`btn-reload ${refreshing ? "is-refreshing" : ""}`}
-              title={refreshing ? "Refreshing metrics..." : "Refresh metrics"}
               aria-label="Refresh metrics"
             >
               <RefreshCw
