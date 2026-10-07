@@ -244,14 +244,25 @@ export const BrowserActivityTable = ({ items = [], loading = false }) => {
                 alignItems: "center",
                 justifyContent: "space-between",
                 flexWrap: "wrap",
-                gap: "12px",
+                rowGap: "8px",
+                columnGap: "10px",
                 marginTop: "14px",
                 paddingTop: "12px",
                 borderTop: "1px solid var(--border-subtle)",
-                fontSize: "0.82rem",
+                fontSize: "0.8rem",
               }}
             >
-              <div style={{ color: "var(--text-muted)", fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif" }}>
+              <div
+                style={{
+                  color: "var(--text-muted)",
+                  fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
+                  fontSize: "0.8rem",
+                  fontVariantNumeric: "tabular-nums",
+                  whiteSpace: "nowrap",
+                  minWidth: 0,
+                  flexShrink: 1,
+                }}
+              >
                 Showing{" "}
                 {filteredItems.length === 0 ? (
                   <span style={{ color: "var(--text-primary)", fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>0</span>
@@ -278,7 +289,14 @@ export const BrowserActivityTable = ({ items = [], loading = false }) => {
               </div>
 
               {totalPages > 1 && (
-                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    flexShrink: 0,
+                  }}
+                >
                   <button
                     type="button"
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
@@ -286,34 +304,40 @@ export const BrowserActivityTable = ({ items = [], loading = false }) => {
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: "4px",
-                      padding: "5px 10px",
+                      gap: "3px",
+                      height: "28px",
+                      padding: "0 8px",
                       borderRadius: "var(--radius-sm)",
-                      background: "rgba(255, 255, 255, 0.05)",
+                      background: "var(--bg-item-row-hover)",
                       border: "1px solid var(--border-subtle)",
                       color: safePage === 1 ? "var(--text-muted)" : "var(--text-primary)",
                       cursor: safePage === 1 ? "not-allowed" : "pointer",
                       opacity: safePage === 1 ? 0.45 : 1,
-                      fontSize: "0.8rem",
+                      fontSize: "0.78rem",
+                      fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
+                      fontVariantNumeric: "tabular-nums",
                       transition: "all 0.2s ease",
+                      userSelect: "none",
                     }}
                     title="Previous page"
                     aria-label="Previous page"
                   >
-                    <ChevronLeft size={14} />
+                    <ChevronLeft size={13} />
                     <span>Prev</span>
                   </button>
 
-                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
                     {getPageNumbers().map((num, idx) => {
                       if (num === "...") {
                         return (
                           <span
                             key={`ellipsis-${idx}`}
                             style={{
-                              padding: "0 4px",
+                              padding: "0 2px",
                               color: "var(--text-muted)",
                               fontSize: "0.8rem",
+                              fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
+                              userSelect: "none",
                             }}
                           >
                             ...
@@ -327,24 +351,25 @@ export const BrowserActivityTable = ({ items = [], loading = false }) => {
                           key={num}
                           onClick={() => setCurrentPage(num)}
                           style={{
-                            minWidth: "28px",
+                            minWidth: "26px",
                             height: "28px",
-                            padding: "0 6px",
+                            padding: "0 4px",
                             borderRadius: "var(--radius-sm)",
-                            background: isCurrent ? "rgba(16, 185, 129, 0.2)" : "rgba(255, 255, 255, 0.04)",
+                            background: isCurrent ? "var(--pagination-emerald-bg)" : "var(--bg-item-row)",
                             border: isCurrent
-                              ? "1px solid rgba(16, 185, 129, 0.5)"
+                              ? "1px solid var(--pagination-emerald-border)"
                               : "1px solid var(--border-subtle)",
-                            color: isCurrent ? "#34D399" : "var(--text-secondary)",
+                            color: isCurrent ? "var(--pagination-emerald-color)" : "var(--text-secondary)",
                             fontWeight: isCurrent ? 600 : 500,
                             fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
                             fontVariantNumeric: "tabular-nums",
                             cursor: "pointer",
-                            fontSize: "0.82rem",
+                            fontSize: "0.8rem",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
                             transition: "all 0.2s ease",
+                            userSelect: "none",
                           }}
                           aria-label={`Page ${num}`}
                           aria-current={isCurrent ? "page" : undefined}
@@ -362,22 +387,26 @@ export const BrowserActivityTable = ({ items = [], loading = false }) => {
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: "4px",
-                      padding: "5px 10px",
+                      gap: "3px",
+                      height: "28px",
+                      padding: "0 8px",
                       borderRadius: "var(--radius-sm)",
-                      background: "rgba(255, 255, 255, 0.05)",
+                      background: "var(--bg-item-row-hover)",
                       border: "1px solid var(--border-subtle)",
                       color: safePage === totalPages ? "var(--text-muted)" : "var(--text-primary)",
                       cursor: safePage === totalPages ? "not-allowed" : "pointer",
                       opacity: safePage === totalPages ? 0.45 : 1,
-                      fontSize: "0.8rem",
+                      fontSize: "0.78rem",
+                      fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
+                      fontVariantNumeric: "tabular-nums",
                       transition: "all 0.2s ease",
+                      userSelect: "none",
                     }}
                     title="Next page"
                     aria-label="Next page"
                   >
                     <span>Next</span>
-                    <ChevronRight size={14} />
+                    <ChevronRight size={13} />
                   </button>
                 </div>
               )}
