@@ -100,7 +100,7 @@ export const UsageTimeLineChart = ({ items = [], totalHours = 0, range = "7d" })
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={chartData}
-            margin={{ top: 10, right: 20, left: -10, bottom: 5 }}
+            margin={{ top: 10, right: 15, left: -15, bottom: 5 }}
           >
             <defs>
               <linearGradient id="usageGradient" x1="0" y1="0" x2="0" y2="1">
@@ -116,15 +116,16 @@ export const UsageTimeLineChart = ({ items = [], totalHours = 0, range = "7d" })
             <XAxis
               dataKey="displayLabel"
               stroke="#94A3B8"
-              fontSize={12}
+              fontSize={11}
               fontFamily="var(--font-satoshi), 'Satoshi', sans-serif"
               tickLine={false}
               axisLine={{ stroke: "rgba(255, 255, 255, 0.1)" }}
+              minTickGap={14}
             />
             <YAxis
               unit="h"
               stroke="#64748B"
-              fontSize={12}
+              fontSize={11}
               fontFamily="var(--font-satoshi), 'Satoshi', sans-serif"
               tickLine={false}
               axisLine={{ stroke: "rgba(255, 255, 255, 0.1)" }}
@@ -155,6 +156,8 @@ export const UsageTimeLineChart = ({ items = [], totalHours = 0, range = "7d" })
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          flexWrap: "wrap",
+          gap: "8px",
           paddingTop: "14px",
           marginTop: "12px",
           borderTop: "1px solid var(--border-subtle)",
