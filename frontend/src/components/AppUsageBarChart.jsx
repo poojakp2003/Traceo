@@ -105,7 +105,7 @@ export const AppUsageBarChart = ({ items = [], totalDurationFormatted = "0 mins"
           <BarChart
             data={chartData}
             layout="vertical"
-            margin={{ top: 5, right: 30, left: 10, bottom: 5 }}
+            margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
           >
             <CartesianGrid
               strokeDasharray="3 3"
@@ -117,7 +117,7 @@ export const AppUsageBarChart = ({ items = [], totalDurationFormatted = "0 mins"
               dataKey="displayValue"
               tickFormatter={(val) => (isHoursMode ? `${val}h` : `${val}m`)}
               stroke="#64748B"
-              fontSize={12}
+              fontSize={11}
               fontFamily="var(--font-satoshi), 'Satoshi', sans-serif"
               tickLine={false}
               axisLine={{ stroke: "rgba(255, 255, 255, 0.1)" }}
@@ -126,10 +126,11 @@ export const AppUsageBarChart = ({ items = [], totalDurationFormatted = "0 mins"
               dataKey="app_name"
               type="category"
               stroke="#94A3B8"
-              fontSize={12}
+              fontSize={11}
               tickLine={false}
               axisLine={{ stroke: "rgba(255, 255, 255, 0.1)" }}
-              width={90}
+              width={76}
+              tickFormatter={(name) => (name && name.length > 10 ? `${name.slice(0, 9)}…` : name)}
             />
             <Tooltip
               content={<CustomTooltip isHoursMode={isHoursMode} />}
@@ -138,7 +139,7 @@ export const AppUsageBarChart = ({ items = [], totalDurationFormatted = "0 mins"
             <Bar
               dataKey="displayValue"
               radius={[0, 6, 6, 0]}
-              barSize={20}
+              barSize={18}
               animationDuration={800}
             >
               {chartData.map((entry, index) => (
@@ -158,6 +159,8 @@ export const AppUsageBarChart = ({ items = [], totalDurationFormatted = "0 mins"
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          flexWrap: "wrap",
+          gap: "8px",
           paddingTop: "14px",
           marginTop: "12px",
           borderTop: "1px solid var(--border-subtle)",
