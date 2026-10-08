@@ -73,17 +73,10 @@ export const TopVisitedDomains = ({ browserData = null, items = null, range = "t
   };
 
   return (
-    <div className="glass-card" style={{ padding: "24px" }}>
+    <div className="glass-card">
       {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: "16px",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+      <div className="card-header-responsive">
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
           <div
             style={{
               width: "34px",
@@ -94,13 +87,14 @@ export const TopVisitedDomains = ({ browserData = null, items = null, range = "t
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              flexShrink: 0,
             }}
           >
             <Compass size={18} />
           </div>
-          <div>
-            <h2 style={{ fontSize: "1.15rem" }}>Top Visited Domains</h2>
-            <p style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>
+          <div style={{ minWidth: 0 }}>
+            <h2 style={{ fontSize: "1.15rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Top Visited Domains</h2>
+            <p style={{ color: "var(--text-muted)", fontSize: "0.8rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               Aggregate web traffic by host domain ({totalVisits} total visits)
             </p>
           </div>
@@ -127,7 +121,7 @@ export const TopVisitedDomains = ({ browserData = null, items = null, range = "t
                 justifyContent: "space-between",
                 gap: "10px",
                 minWidth: 0,
-                minHeight: "52px",
+                minHeight: "48px",
                 padding: "10px 14px",
                 background: "rgba(255, 255, 255, 0.025)",
                 border: "1px solid var(--border-subtle)",
@@ -185,20 +179,7 @@ export const TopVisitedDomains = ({ browserData = null, items = null, range = "t
 
       {/* Pagination Controls */}
       {sortedDomains.length > 0 && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            rowGap: "8px",
-            columnGap: "10px",
-            marginTop: "14px",
-            paddingTop: "12px",
-            borderTop: "1px solid var(--border-subtle)",
-            fontSize: "0.8rem",
-          }}
-        >
+        <div className="pagination-container">
           <div
             style={{
               color: "var(--text-muted)",
@@ -225,36 +206,12 @@ export const TopVisitedDomains = ({ browserData = null, items = null, range = "t
             visited domains
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "5px",
-              flexShrink: 0,
-            }}
-          >
+          <div className="pagination-controls-group">
             <button
               type="button"
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={safePage === 1}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "3px",
-                height: "28px",
-                padding: "0 8px",
-                borderRadius: "var(--radius-sm)",
-                background: "var(--bg-item-row-hover)",
-                border: "1px solid var(--border-subtle)",
-                color: safePage === 1 ? "var(--text-muted)" : "var(--text-primary)",
-                cursor: safePage === 1 ? "not-allowed" : "pointer",
-                opacity: safePage === 1 ? 0.45 : 1,
-                fontSize: "0.78rem",
-                fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
-                fontVariantNumeric: "tabular-nums",
-                transition: "all 0.2s ease",
-                userSelect: "none",
-              }}
+              className="pagination-btn"
               title="Previous page"
               aria-label="Previous page"
             >
@@ -286,26 +243,15 @@ export const TopVisitedDomains = ({ browserData = null, items = null, range = "t
                     type="button"
                     key={num}
                     onClick={() => setCurrentPage(num)}
+                    className="pagination-btn"
                     style={{
-                      minWidth: "26px",
-                      height: "28px",
-                      padding: "0 4px",
-                      borderRadius: "var(--radius-sm)",
+                      minWidth: "32px",
                       background: isCurrent ? "var(--pagination-emerald-bg)" : "var(--bg-item-row)",
                       border: isCurrent
                         ? "1px solid var(--pagination-emerald-border)"
                         : "1px solid var(--border-subtle)",
                       color: isCurrent ? "var(--pagination-emerald-color)" : "var(--text-secondary)",
                       fontWeight: isCurrent ? 600 : 500,
-                      fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
-                      fontVariantNumeric: "tabular-nums",
-                      cursor: "pointer",
-                      fontSize: "0.8rem",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      transition: "all 0.2s ease",
-                      userSelect: "none",
                     }}
                     aria-label={`Page ${num}`}
                     aria-current={isCurrent ? "page" : undefined}
@@ -320,24 +266,7 @@ export const TopVisitedDomains = ({ browserData = null, items = null, range = "t
               type="button"
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={safePage === totalPages}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "3px",
-                height: "28px",
-                padding: "0 8px",
-                borderRadius: "var(--radius-sm)",
-                background: "var(--bg-item-row-hover)",
-                border: "1px solid var(--border-subtle)",
-                color: safePage === totalPages ? "var(--text-muted)" : "var(--text-primary)",
-                cursor: safePage === totalPages ? "not-allowed" : "pointer",
-                opacity: safePage === totalPages ? 0.45 : 1,
-                fontSize: "0.78rem",
-                fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
-                fontVariantNumeric: "tabular-nums",
-                transition: "all 0.2s ease",
-                userSelect: "none",
-              }}
+              className="pagination-btn"
               title="Next page"
               aria-label="Next page"
             >
