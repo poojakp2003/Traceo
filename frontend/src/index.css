@@ -5,6 +5,7 @@
   --bg-card: rgba(17, 24, 39, 0.75);
   --bg-card-hover: rgba(31, 41, 55, 0.85);
   --bg-input: rgba(15, 23, 42, 0.8);
+  --bg-input-solid: #0F172A;
   --bg-item-row: rgba(255, 255, 255, 0.025);
   --bg-item-row-hover: rgba(255, 255, 255, 0.05);
   --navbar-bg: rgba(11, 15, 25, 0.85);
@@ -50,6 +51,7 @@
   --bg-card: rgba(255, 255, 255, 0.95);
   --bg-card-hover: #F1F5F9;
   --bg-input: #FFFFFF;
+  --bg-input-solid: #FFFFFF;
   --bg-item-row: rgba(241, 245, 249, 0.7);
   --bg-item-row-hover: #E2E8F0;
   --navbar-bg: rgba(255, 255, 255, 0.88);
@@ -102,6 +104,11 @@ html {
   -webkit-text-size-adjust: 100%;
   overflow-x: hidden;
   max-width: 100%;
+  color-scheme: dark;
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
 }
 
 body {
@@ -257,7 +264,7 @@ a:hover {
   width: 100%;
   padding: 12px 14px;
   min-height: 44px;
-  background: var(--bg-input);
+  background: var(--bg-input-solid);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   color: var(--text-primary);
@@ -275,6 +282,35 @@ a:hover {
 
 .input-field::placeholder {
   color: var(--text-muted);
+}
+
+/* Chrome/Edge/Safari paint a white/blue fill on autofilled values */
+.input-field:-webkit-autofill,
+.input-field:-webkit-autofill:hover,
+.input-field:-webkit-autofill:focus,
+.input-field:-webkit-autofill:active,
+.search-input-satoshi:-webkit-autofill,
+.search-input-satoshi:-webkit-autofill:hover,
+.search-input-satoshi:-webkit-autofill:focus,
+.search-input-satoshi:-webkit-autofill:active,
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--text-primary) !important;
+  caret-color: var(--text-primary);
+  border-color: var(--border-subtle);
+  box-shadow: 0 0 0 1000px var(--bg-input-solid) inset !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--bg-input-solid) inset !important;
+  transition: background-color 99999s ease-out 0s, color 99999s ease-out 0s;
+}
+
+.input-field:-webkit-autofill:focus,
+.search-input-satoshi:-webkit-autofill:focus,
+input:-webkit-autofill:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1000px var(--bg-input-solid) inset, 0 0 0 3px var(--primary-glow) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--bg-input-solid) inset, 0 0 0 3px var(--primary-glow) !important;
 }
 
 /* Badges */
