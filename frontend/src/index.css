@@ -321,10 +321,9 @@ a:hover {
 .navbar {
   position: sticky;
   top: 0;
-  z-index: 50;
-  background: var(--navbar-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  z-index: 200;
+  isolation: isolate;
+  background: var(--bg-main);
   border-bottom: 1px solid var(--border-subtle);
   padding: 12px clamp(14px, 3.5vw, 24px);
   display: flex;
@@ -343,6 +342,8 @@ a:hover {
   display: flex;
   align-items: center;
   gap: clamp(16px, 3vw, 32px);
+  position: relative;
+  z-index: 3;
 }
 
 .navbar-right {
@@ -435,6 +436,8 @@ a:hover {
   touch-action: manipulation;
   transition: all 0.2s ease;
   flex-shrink: 0;
+  position: relative;
+  z-index: 3;
 }
 
 .navbar-hamburger-btn:hover,
@@ -444,25 +447,38 @@ a:hover {
   outline: none;
 }
 
+.navbar-mobile-backdrop {
+  position: fixed;
+  inset: 0;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: rgba(0, 0, 0, 0.62);
+  cursor: pointer;
+  z-index: 1;
+}
+
 .navbar-mobile-drawer {
   position: absolute;
   top: 100%;
   left: 0;
   right: 0;
-  background: var(--navbar-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--bg-main);
   border-bottom: 1px solid var(--border-subtle);
   box-shadow: 0 16px 32px rgba(0, 0, 0, 0.5);
-  padding: 16px 20px;
+  padding: 16px 20px 20px;
   display: flex;
   flex-direction: column;
   gap: 14px;
-  z-index: 49;
+  z-index: 2;
+}
+
+[data-theme="light"] .navbar-mobile-backdrop {
+  background: rgba(15, 23, 42, 0.45);
 }
 
 [data-theme="light"] .navbar-mobile-drawer {
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--bg-main);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
 }
 

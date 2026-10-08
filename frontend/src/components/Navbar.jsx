@@ -45,6 +45,15 @@ export const Navbar = () => {
     };
   }, [mobileMenuOpen]);
 
+  useEffect(() => {
+    if (!mobileMenuOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileMenuOpen]);
+
   return (
     <header className="navbar" ref={menuRef}>
       <div className="navbar-left">
@@ -121,45 +130,53 @@ export const Navbar = () => {
 
       {/* Collapsible Mobile Navigation Drawer */}
       {mobileMenuOpen && (
-        <div className="navbar-mobile-drawer animate-fade-in mobile-only-nav">
-          <nav className="navbar-mobile-links">
-            <Link
-              to="/dashboard"
-              className={`navbar-mobile-link ${location.pathname === "/dashboard" ? "active" : ""}`}
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <LayoutDashboard size={18} />
-              <span>Dashboard</span>
-            </Link>
-            <Link
-              to="/settings"
-              className={`navbar-mobile-link ${location.pathname === "/settings" ? "active" : ""}`}
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <Settings size={18} />
-              <span>Settings</span>
-            </Link>
-          </nav>
+        <>
+          <button
+            type="button"
+            className="navbar-mobile-backdrop mobile-only-nav"
+            aria-label="Close navigation menu"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          <div className="navbar-mobile-drawer animate-fade-in mobile-only-nav">
+            <nav className="navbar-mobile-links">
+              <Link
+                to="/dashboard"
+                className={`navbar-mobile-link ${location.pathname === "/dashboard" ? "active" : ""}`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <LayoutDashboard size={18} />
+                <span>Dashboard</span>
+              </Link>
+              <Link
+                to="/settings"
+                className={`navbar-mobile-link ${location.pathname === "/settings" ? "active" : ""}`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Settings size={18} />
+                <span>Settings</span>
+              </Link>
+            </nav>
 
-          <div className="navbar-mobile-footer">
-            {user && (
-              <div className="nav-user-pill" style={{ width: "100%", justifyContent: "center" }}>
-                <UserIcon size={15} color="var(--primary)" />
-                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {user.email}
-                </span>
-              </div>
-            )}
-            <button
-              onClick={handleLogout}
-              className="btn btn-secondary"
-              style={{ width: "100%", minHeight: "44px" }}
-            >
-              <LogOut size={16} />
-              <span>Logout</span>
-            </button>
+            <div className="navbar-mobile-footer">
+              {user && (
+                <div className="nav-user-pill" style={{ width: "100%", justifyContent: "center" }}>
+                  <UserIcon size={15} color="var(--primary)" />
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {user.email}
+                  </span>
+                </div>
+              )}
+              <button
+                onClick={handleLogout}
+                className="btn btn-secondary"
+                style={{ width: "100%", minHeight: "44px" }}
+              >
+                <LogOut size={16} />
+                <span>Logout</span>
+              </button>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </header>
   );
