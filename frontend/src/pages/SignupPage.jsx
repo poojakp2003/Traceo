@@ -47,12 +47,12 @@ export const SignupPage = () => {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      padding: "20px",
+      padding: "clamp(16px, 4vw, 24px)",
     }}>
       <div className="glass-card animate-fade-in" style={{
         width: "100%",
         maxWidth: "420px",
-        padding: "36px 32px",
+        padding: "clamp(24px, 6vw, 36px) clamp(18px, 5vw, 32px)",
       }}>
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: "28px" }}>
@@ -69,7 +69,7 @@ export const SignupPage = () => {
           }}>
             <Activity size={26} color="#FFFFFF" />
           </div>
-          <h1 style={{ fontSize: "1.75rem", marginBottom: "6px" }}>Create account</h1>
+          <h1 style={{ fontSize: "clamp(1.4rem, 4vw, 1.75rem)", marginBottom: "6px" }}>Create account</h1>
           <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
             Start monitoring your productivity and focus
           </p>
@@ -87,8 +87,9 @@ export const SignupPage = () => {
             display: "flex",
             alignItems: "center",
             gap: "8px",
+            wordBreak: "break-word",
           }}>
-            <AlertCircle size={16} />
+            <AlertCircle size={16} style={{ flexShrink: 0 }} />
             <span>{error}</span>
           </div>
         )}
@@ -102,6 +103,8 @@ export const SignupPage = () => {
               <input
                 id="email"
                 type="email"
+                autoComplete="email"
+                inputMode="email"
                 required
                 className="input-field"
                 style={{ paddingLeft: "42px" }}
@@ -119,6 +122,7 @@ export const SignupPage = () => {
               <input
                 id="password"
                 type="password"
+                autoComplete="new-password"
                 required
                 minLength={8}
                 className="input-field"
@@ -137,6 +141,7 @@ export const SignupPage = () => {
               <input
                 id="confirm-password"
                 type="password"
+                autoComplete="new-password"
                 required
                 minLength={8}
                 className="input-field"
@@ -152,7 +157,7 @@ export const SignupPage = () => {
             type="submit"
             disabled={loading}
             className="btn btn-primary"
-            style={{ width: "100%", marginTop: "10px" }}
+            style={{ width: "100%", marginTop: "10px", minHeight: "44px" }}
           >
             {loading ? "Creating account..." : "Sign Up"}
             {!loading && <ArrowRight size={16} />}
@@ -162,7 +167,7 @@ export const SignupPage = () => {
         {/* Footer */}
         <div style={{ textAlign: "center", marginTop: "24px", fontSize: "0.85rem", color: "var(--text-secondary)" }}>
           Already have an account?{" "}
-          <Link to="/login" style={{ fontWeight: 600 }}>Sign in</Link>
+          <Link to="/login" style={{ fontWeight: 600, padding: "4px" }}>Sign in</Link>
         </div>
       </div>
     </div>
