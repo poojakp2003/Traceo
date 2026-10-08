@@ -153,12 +153,12 @@ export const SettingsPage = () => {
         </div>
       )}
 
-      <main className="container animate-fade-in" style={{ maxWidth: "860px", padding: "14px 20px 20px 20px" }}>
+      <main className="container animate-fade-in" style={{ maxWidth: "860px" }}>
         {/* Page Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "14px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px", flexWrap: "wrap", gap: "12px" }}>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "3px" }}>
-              <h1 style={{ fontSize: "1.65rem" }}>Settings</h1>
+              <h1 style={{ fontSize: "clamp(1.4rem, 3.5vw, 1.65rem)" }}>Settings</h1>
               <span className="badge badge-cyan" style={{ fontSize: "0.7rem" }}>
                 Live Control
               </span>
@@ -172,7 +172,7 @@ export const SettingsPage = () => {
             onClick={() => loadPermissions(true)}
             disabled={loading || isRefreshing}
             className="btn btn-secondary"
-            style={{ fontSize: "0.82rem", padding: "6px 12px", display: "flex", alignItems: "center", gap: "6px" }}
+            style={{ fontSize: "0.82rem", padding: "6px 12px", minHeight: "38px", display: "flex", alignItems: "center", gap: "6px" }}
             title="Reload current permissions from database"
           >
             <RefreshCw size={13} className={isRefreshing ? "animate-spin" : ""} />
@@ -181,7 +181,7 @@ export const SettingsPage = () => {
         </div>
 
         {errorMsg && (
-          <div className="toast-banner toast-error" style={{ marginBottom: "14px", padding: "10px 14px" }}>
+          <div className="toast-banner toast-error" style={{ marginBottom: "14px", padding: "10px 14px", wordBreak: "break-word" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <AlertCircle size={16} />
               <span style={{ fontSize: "0.85rem" }}>{errorMsg}</span>
@@ -204,7 +204,7 @@ export const SettingsPage = () => {
         )}
 
         {/* 1. Theme & Appearance Card */}
-        <div className="glass-card" style={{ padding: "16px 22px", marginBottom: "12px" }}>
+        <div className="glass-card" style={{ padding: "clamp(14px, 3vw, 22px)", marginBottom: "16px" }}>
           {/* Section Header */}
           <div
             style={{
@@ -232,7 +232,7 @@ export const SettingsPage = () => {
           {/* White Theme Capsule Switch Row */}
           <div className="settings-row-card">
             {/* Left: Icon and Title */}
-            <div style={{ display: "flex", alignItems: "center", gap: "14px", maxWidth: "75%" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1, minWidth: 0 }}>
               <div
                 style={{
                   width: "36px",
@@ -253,7 +253,7 @@ export const SettingsPage = () => {
                 )}
               </div>
 
-              <div>
+              <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2px" }}>
                   <span style={{ fontWeight: 600, fontSize: "0.95rem", color: "var(--text-primary)" }}>
                     White Theme View
@@ -276,7 +276,7 @@ export const SettingsPage = () => {
         </div>
 
         {/* 2. Tracking Settings Main Card */}
-        <div className="glass-card" style={{ padding: "16px 22px", marginBottom: "0px" }}>
+        <div className="glass-card" style={{ padding: "clamp(14px, 3vw, 22px)", marginBottom: "0px" }}>
           {/* Section Header */}
           <div
             style={{
@@ -318,7 +318,7 @@ export const SettingsPage = () => {
                 return (
                   <div key={opt.id} className="settings-row-card">
                     {/* Left: Icon and Labels */}
-                    <div style={{ display: "flex", alignItems: "center", gap: "14px", maxWidth: "75%" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1, minWidth: 0 }}>
                       <div
                         style={{
                           width: "36px",
@@ -334,7 +334,7 @@ export const SettingsPage = () => {
                         <IconComponent size={18} color={opt.color} />
                       </div>
 
-                      <div>
+                      <div style={{ minWidth: 0, flex: 1 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "2px" }}>
                           <span style={{ fontWeight: 600, fontSize: "0.95rem", color: "var(--text-primary)" }}>
                             {opt.title}
