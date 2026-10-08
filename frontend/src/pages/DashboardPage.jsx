@@ -103,13 +103,13 @@ export const DashboardPage = () => {
           }}
         >
           <div>
-            <h1 style={{ fontSize: "2rem", marginBottom: "4px" }}>Activity Dashboard</h1>
-            <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
+            <h1 style={{ fontSize: "clamp(1.5rem, 3.5vw, 2rem)", marginBottom: "4px" }}>Activity Dashboard</h1>
+            <p style={{ color: "var(--text-secondary)", fontSize: "clamp(0.85rem, 2vw, 0.9rem)" }}>
               Visual analytics for applications, daily usage trends, web browsing, and video learning
             </p>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
             <RangeSelector currentRange={range} onSelectRange={setRange} />
             <button
               type="button"
@@ -136,6 +136,7 @@ export const DashboardPage = () => {
               color: "#FB7185",
               fontSize: "0.9rem",
               marginBottom: "24px",
+              wordBreak: "break-word",
             }}
           >
             {error}
@@ -143,14 +144,7 @@ export const DashboardPage = () => {
         )}
 
         {/* 1. Summary Metrics Cards */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-            gap: "20px",
-            marginBottom: "32px",
-          }}
-        >
+        <div className="dashboard-stats-grid">
           <StatCard
             title="Today"
             value={summary ? summary.today_formatted : "..."}
@@ -181,23 +175,18 @@ export const DashboardPage = () => {
           />
         </div>
 
-        {/* 2. Step 15 — Charts Using Recharts */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(460px, 1fr))",
-            gap: "24px",
-            marginBottom: "32px",
-          }}
-        >
+        {/* 2. Charts Using Recharts */}
+        <div className="dashboard-charts-grid">
           {/* Bar Chart: Shows application usage */}
-          <div className="glass-card" style={{ padding: "24px" }}>
+          <div className="glass-card">
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
                 marginBottom: "16px",
+                flexWrap: "wrap",
+                gap: "8px",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -238,13 +227,15 @@ export const DashboardPage = () => {
           </div>
 
           {/* Line Chart: Shows usage over time */}
-          <div className="glass-card" style={{ padding: "24px" }}>
+          <div className="glass-card">
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
                 marginBottom: "16px",
+                flexWrap: "wrap",
+                gap: "8px",
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -286,15 +277,8 @@ export const DashboardPage = () => {
           </div>
         </div>
 
-        {/* 3. Step 16 — Browser History and YouTube List */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(460px, 1fr))",
-            gap: "24px",
-            marginBottom: "32px",
-          }}
-        >
+        {/* 3. Browser History and YouTube List */}
+        <div className="dashboard-activity-grid">
           {/* Browser Activity Table */}
           <BrowserActivityTable
             items={browserHistory?.items || []}
