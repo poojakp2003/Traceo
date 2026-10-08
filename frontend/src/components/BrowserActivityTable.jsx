@@ -53,18 +53,11 @@ export const BrowserActivityTable = ({ items = [], loading = false }) => {
     return [1, "...", safePage - 1, safePage, safePage + 1, "...", totalPages];
   };
 
+  
   return (
-    <div className="glass-card" style={{ padding: "24px", display: "flex", flexDirection: "column" }}>
+    <div className="glass-card" style={{ display: "flex", flexDirection: "column" }}>
       {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "12px",
-          marginBottom: "18px",
-        }}
-      >
+      <div className="card-header-responsive">
         <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
           <div
             style={{
@@ -92,18 +85,7 @@ export const BrowserActivityTable = ({ items = [], loading = false }) => {
         </div>
 
         {/* Search input */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            background: "var(--bg-input)",
-            border: "1px solid var(--border-subtle)",
-            borderRadius: "var(--radius-sm)",
-            padding: "6px 12px",
-            flexShrink: 0,
-          }}
-        >
+        <div className="table-search-box">
           <Search size={14} color="var(--text-muted)" />
           <input
             type="text"
@@ -137,7 +119,7 @@ export const BrowserActivityTable = ({ items = [], loading = false }) => {
           <div className="skeleton" style={{ height: "40px" }} />
         </div>
       ) : filteredItems.length > 0 ? (
-        <div style={{ overflowX: "auto" }}>
+        <div className="table-responsive-wrapper">
           <table
             style={{
               width: "100%",
@@ -177,7 +159,7 @@ export const BrowserActivityTable = ({ items = [], loading = false }) => {
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
                                 whiteSpace: "nowrap",
-                                maxWidth: "280px",
+                                maxWidth: "clamp(140px, 35vw, 320px)",
                               }}
                               title={item.url}
                             >
@@ -187,7 +169,7 @@ export const BrowserActivityTable = ({ items = [], loading = false }) => {
                               href={item.url.startsWith("http") ? item.url : `https://${item.url}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              style={{ color: "var(--text-muted)", display: "flex", alignItems: "center" }}
+                              style={{ color: "var(--text-muted)", display: "flex", alignItems: "center", padding: "4px" }}
                               title="Open URL"
                             >
                               <ExternalLink size={13} />
@@ -201,7 +183,7 @@ export const BrowserActivityTable = ({ items = [], loading = false }) => {
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
                                 whiteSpace: "nowrap",
-                                maxWidth: "300px",
+                                maxWidth: "clamp(140px, 35vw, 340px)",
                               }}
                             >
                               {item.title}
@@ -238,20 +220,7 @@ export const BrowserActivityTable = ({ items = [], loading = false }) => {
           </table>
           {/* Pagination Controls */}
           {filteredItems.length > 0 && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                flexWrap: "wrap",
-                rowGap: "8px",
-                columnGap: "10px",
-                marginTop: "14px",
-                paddingTop: "12px",
-                borderTop: "1px solid var(--border-subtle)",
-                fontSize: "0.8rem",
-              }}
-            >
+            <div className="pagination-container">
               <div
                 style={{
                   color: "var(--text-muted)",
@@ -289,36 +258,12 @@ export const BrowserActivityTable = ({ items = [], loading = false }) => {
               </div>
 
               {totalPages > 1 && (
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "5px",
-                    flexShrink: 0,
-                  }}
-                >
+                <div className="pagination-controls-group">
                   <button
                     type="button"
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={safePage === 1}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "3px",
-                      height: "28px",
-                      padding: "0 8px",
-                      borderRadius: "var(--radius-sm)",
-                      background: "var(--bg-item-row-hover)",
-                      border: "1px solid var(--border-subtle)",
-                      color: safePage === 1 ? "var(--text-muted)" : "var(--text-primary)",
-                      cursor: safePage === 1 ? "not-allowed" : "pointer",
-                      opacity: safePage === 1 ? 0.45 : 1,
-                      fontSize: "0.78rem",
-                      fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
-                      fontVariantNumeric: "tabular-nums",
-                      transition: "all 0.2s ease",
-                      userSelect: "none",
-                    }}
+                    className="pagination-btn"
                     title="Previous page"
                     aria-label="Previous page"
                   >
@@ -350,26 +295,15 @@ export const BrowserActivityTable = ({ items = [], loading = false }) => {
                           type="button"
                           key={num}
                           onClick={() => setCurrentPage(num)}
+                          className="pagination-btn"
                           style={{
-                            minWidth: "26px",
-                            height: "28px",
-                            padding: "0 4px",
-                            borderRadius: "var(--radius-sm)",
+                            minWidth: "32px",
                             background: isCurrent ? "var(--pagination-emerald-bg)" : "var(--bg-item-row)",
                             border: isCurrent
                               ? "1px solid var(--pagination-emerald-border)"
                               : "1px solid var(--border-subtle)",
                             color: isCurrent ? "var(--pagination-emerald-color)" : "var(--text-secondary)",
                             fontWeight: isCurrent ? 600 : 500,
-                            fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
-                            fontVariantNumeric: "tabular-nums",
-                            cursor: "pointer",
-                            fontSize: "0.8rem",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            transition: "all 0.2s ease",
-                            userSelect: "none",
                           }}
                           aria-label={`Page ${num}`}
                           aria-current={isCurrent ? "page" : undefined}
@@ -384,24 +318,7 @@ export const BrowserActivityTable = ({ items = [], loading = false }) => {
                     type="button"
                     onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                     disabled={safePage === totalPages}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "3px",
-                      height: "28px",
-                      padding: "0 8px",
-                      borderRadius: "var(--radius-sm)",
-                      background: "var(--bg-item-row-hover)",
-                      border: "1px solid var(--border-subtle)",
-                      color: safePage === totalPages ? "var(--text-muted)" : "var(--text-primary)",
-                      cursor: safePage === totalPages ? "not-allowed" : "pointer",
-                      opacity: safePage === totalPages ? 0.45 : 1,
-                      fontSize: "0.78rem",
-                      fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
-                      fontVariantNumeric: "tabular-nums",
-                      transition: "all 0.2s ease",
-                      userSelect: "none",
-                    }}
+                    className="pagination-btn"
                     title="Next page"
                     aria-label="Next page"
                   >
