@@ -1174,17 +1174,21 @@ input:-webkit-autofill:focus {
   flex-shrink: 0;
 }
 
+.btn-reload:focus,
+.btn-reload:focus-visible {
+  outline: none;
+}
+
 .btn-reload:hover:not(:disabled) {
   background: var(--bg-item-row-hover, rgba(255, 255, 255, 0.08));
-  border-color: rgba(6, 182, 212, 0.45);
+  border-color: rgba(255, 255, 255, 0.2);
   color: var(--text-primary, #ffffff);
-  box-shadow: 0 0 16px rgba(6, 182, 212, 0.2);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.05);
   transform: translateY(-1px);
 }
 
 .btn-reload:hover:not(:disabled) .reload-icon {
-  transform: rotate(45deg);
-  color: var(--primary, #06b6d4);
+  color: var(--text-primary, #ffffff);
 }
 
 .btn-reload:active:not(:disabled) {
@@ -1197,38 +1201,14 @@ input:-webkit-autofill:focus {
 
 /* Active reloading state */
 .btn-reload.is-refreshing {
-  background: rgba(6, 182, 212, 0.12);
-  border-color: rgba(6, 182, 212, 0.55);
-  color: var(--primary, #06b6d4);
-  animation: reload-glow-pulse 1.4s ease-in-out infinite;
+  background: var(--bg-item-row-hover, rgba(255, 255, 255, 0.08));
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--text-primary, #ffffff);
 }
 
 .reload-icon {
-  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.25s ease;
-}
-
-.reload-icon.spinning {
-  animation: reload-continuous-spin 0.85s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
-}
-
-@keyframes reload-continuous-spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes reload-glow-pulse {
-  0%, 100% {
-    box-shadow: 0 0 12px rgba(6, 182, 212, 0.2), inset 0 0 8px rgba(6, 182, 212, 0.1);
-    border-color: rgba(6, 182, 212, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 22px rgba(6, 182, 212, 0.45), inset 0 0 14px rgba(6, 182, 212, 0.25);
-    border-color: rgba(6, 182, 212, 0.75);
-  }
+  transition: transform 0.9s ease-in-out, color 0.25s ease;
+  transform-origin: center;
 }
 
 /* ------------------------------------------------------------- */
