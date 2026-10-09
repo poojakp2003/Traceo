@@ -31,6 +31,7 @@ export const DashboardPage = () => {
   const [range, setRange] = useState("today");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [rotationAngle, setRotationAngle] = useState(0);
   const [summary, setSummary] = useState(null);
   const [appsData, setAppsData] = useState(null);
   const [timelineData, setTimelineData] = useState(null);
@@ -74,12 +75,17 @@ export const DashboardPage = () => {
       setLoading(false);
       if (isManualRefresh) {
         const elapsed = Date.now() - startTime;
-        if (elapsed < 750) {
-          await new Promise((resolve) => setTimeout(resolve, 750 - elapsed));
+        if (elapsed < 900) {
+          await new Promise((resolve) => setTimeout(resolve, 900 - elapsed));
         }
         setRefreshing(false);
       }
     }
+  };
+
+  const handleRefresh = () => {
+    setRotationAngle((prev) => prev + 180);
+    fetchData(true);
   };
 
   useEffect(() => {
@@ -113,14 +119,15 @@ export const DashboardPage = () => {
             <RangeSelector currentRange={range} onSelectRange={setRange} />
             <button
               type="button"
-              onClick={() => fetchData(true)}
+              onClick={handleRefresh}
               disabled={refreshing}
               className={`btn-reload ${refreshing ? "is-refreshing" : ""}`}
               aria-label="Refresh metrics"
             >
               <RefreshCw
                 size={16}
-                className={`reload-icon ${refreshing ? "spinning" : ""}`}
+                className="reload-icon"
+                style={{ transform: `rotate(${rotationAngle}deg)` }}
               />
             </button>
           </div>
