@@ -175,7 +175,7 @@ export const SettingsPage = () => {
             style={{ fontSize: "0.82rem", padding: "6px 12px", minHeight: "38px", display: "flex", alignItems: "center", gap: "6px" }}
             title="Reload current permissions from database"
           >
-            <RefreshCw size={13} className={isRefreshing ? "animate-spin" : ""} />
+            <RefreshCw size={13} className={isRefreshing ? "animate-spin-slow" : ""} />
             <span>Sync</span>
           </button>
         </div>
