@@ -62,7 +62,7 @@ export const SettingsPage = () => {
     } finally {
       setLoading(false);
       if (showRefreshIndicator) {
-        setTimeout(() => setIsRefreshing(false), 400);
+        setTimeout(() => setIsRefreshing(false), 1600);
       }
     }
   };

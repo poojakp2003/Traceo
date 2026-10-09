@@ -1150,7 +1150,7 @@ input:-webkit-autofill:focus {
 }
 
 .animate-spin-slow {
-  animation: spin 1.6s linear infinite;
+  animation: spin 3s linear infinite;
 }
 
 /* Interactive reload button (Touch target 44x44px) */
