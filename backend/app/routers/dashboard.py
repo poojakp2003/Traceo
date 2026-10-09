@@ -383,20 +383,68 @@ def get_dashboard_timeline(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> DashboardTimelineResponse:
-    """Retrieve daily timeline points for charting combined app + YouTube usage duration."""
+    """Retrieve hourly (for 'today') or daily timeline points for charting combined app + YouTube usage duration."""
     cutoff = get_range_cutoff(time_range)
     now = datetime.now(timezone.utc)
 
-    # Determine date span to display
     key = time_range.lower().strip()
+
+    # ── TODAY: return 24 hourly buckets (0h–23h) ─────────────────────────────
+    if key == "today":
+        today_local = now.date()
+        hourly_seconds: dict[int, int] = defaultdict(int)
+        hourly_sessions: dict[int, int] = defaultdict(int)
+
+        # App usage
+        app_query = select(AppUsage.start_time, AppUsage.duration_seconds).where(
+            AppUsage.user_id == current_user.id,
+            AppUsage.start_time >= cutoff,
+        )
+        for rec in db.execute(app_query).all():
+            h = rec.start_time.hour
+            hourly_seconds[h] += rec.duration_seconds
+            hourly_sessions[h] += 1
+
+        # YouTube
+        yt_q = select(YouTubeActivity.timestamp, YouTubeActivity.watched_time_seconds).where(
+            YouTubeActivity.user_id == current_user.id,
+            YouTubeActivity.timestamp >= cutoff,
+        )
+        for rec in db.execute(yt_q).all():
+            h = rec.timestamp.hour
+            hourly_seconds[h] += rec.watched_time_seconds
+            hourly_sessions[h] += 1
+
+        items: list[TimelinePoint] = []
+        total_sec = 0
+        for h in range(24):
+            dur = hourly_seconds.get(h, 0)
+            total_sec += dur
+            items.append(
+                TimelinePoint(
+                    date=f"{today_local} {h:02d}:00",
+                    day=f"{h}h",
+                    hours=round(dur / 3600.0, 2),
+                    duration_seconds=dur,
+                    duration_formatted=format_duration(dur),
+                    session_count=hourly_sessions.get(h, 0),
+                )
+            )
+
+        return DashboardTimelineResponse(
+            range=time_range,
+            total_hours=round(total_sec / 3600.0, 1),
+            total_duration_formatted=format_duration(total_sec),
+            items=items,
+        )
+
+    # ── MULTI-DAY: aggregate by calendar date ────────────────────────────────
     match key:
-        case "today" | "24h":
-            day_count = 1
         case "30d":
             day_count = 30
         case "all":
             day_count = 14
-        case _:  # default 7d
+        case _:  # default 7d / 24h
             day_count = 7
 
     target_dates = [now.date() - timedelta(days=i) for i in range(day_count - 1, -1, -1)]

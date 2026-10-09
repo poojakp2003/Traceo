@@ -263,7 +263,7 @@ export const DashboardPage = () => {
                 <div>
                   <h2 style={{ fontSize: "1.15rem" }}>Usage Over Time</h2>
                   <p style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>
-                    Daily usage trend across days
+                    {range === "today" ? "Hourly usage breakdown (0–23h)" : "Daily usage trend across days"}
                   </p>
                 </div>
               </div>

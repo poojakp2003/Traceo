@@ -85,9 +85,10 @@ export const UsageTimeLineChart = ({ items = [], totalHours = 0, range = "7d" })
     );
   }
 
-  // Format date for X-Axis as DD/MM (e.g. 07/10)
+  // For "today" use the `day` field ("0h", "1h", …); for multi-day use the formatted date
+  const isToday = range === "today";
   const chartData = items.map((point) => {
-    const formattedDate = formatDateToDayMonth(point.date);
+    const formattedDate = isToday ? point.day : formatDateToDayMonth(point.date);
     return {
       ...point,
       displayLabel: formattedDate || (point.day ? point.day.substring(0, 3) : ""),
@@ -120,7 +121,8 @@ export const UsageTimeLineChart = ({ items = [], totalHours = 0, range = "7d" })
               fontFamily="var(--font-satoshi), 'Satoshi', sans-serif"
               tickLine={false}
               axisLine={{ stroke: "rgba(255, 255, 255, 0.1)" }}
-              minTickGap={14}
+              minTickGap={isToday ? 0 : 14}
+              interval={isToday ? 2 : "preserveStartEnd"}
             />
             <YAxis
               unit="h"
@@ -167,10 +169,10 @@ export const UsageTimeLineChart = ({ items = [], totalHours = 0, range = "7d" })
       >
         <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
           <Calendar size={14} color="var(--accent-purple)" />
-          <span>Active Trend ({range.toUpperCase()})</span>
+          <span>{isToday ? "Hourly usage trend (TODAY)" : `Active Trend (${range.toUpperCase()})`}</span>
         </span>
-        <span>Avg/Day: <strong className="font-satoshi-num" style={{ color: "var(--accent-purple)" }}>
-          {items.length > 0 ? (totalHours / items.length).toFixed(1) : 0} hrs
+        <span>{isToday ? "Avg/Hr:" : "Avg/Day:"} <strong className="font-satoshi-num" style={{ color: "var(--accent-purple)" }}>
+          {items.length > 0 ? (totalHours / items.length).toFixed(2) : 0} hrs
         </strong></span>
       </div>
     </div>
