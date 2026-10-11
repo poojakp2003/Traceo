@@ -10,6 +10,17 @@ import {
 } from "recharts";
 import { Calendar, TrendingUp } from "lucide-react";
 
+// Smart Y-axis formatter: minutes when total is < 1 hr, hours otherwise
+const formatYAxis = (value, maxHours) => {
+  if (maxHours < 1) {
+    // display in minutes
+    const mins = Math.round(value * 60);
+    return `${mins}m`;
+  }
+  // display in hours
+  return `${value % 1 === 0 ? value : +value.toFixed(2)}h`;
+};
+
 // Helper to format date string into DD/MM format (e.g., "2026-10-07" -> "07/10")
 const formatDateToDayMonth = (dateStr) => {
   if (!dateStr) return "";
@@ -63,6 +74,8 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export const UsageTimeLineChart = ({ items = [], totalHours = 0, range = "7d" }) => {
+  // Determine the max value so we know which unit to use on the Y-axis
+  const maxHours = items.length > 0 ? Math.max(...items.map((d) => d.hours || 0)) : 0;
   if (!items || items.length === 0) {
     return (
       <div
@@ -125,12 +138,13 @@ export const UsageTimeLineChart = ({ items = [], totalHours = 0, range = "7d" })
               interval={isToday ? 2 : "preserveStartEnd"}
             />
             <YAxis
-              unit="h"
+              tickFormatter={(v) => formatYAxis(v, maxHours)}
               stroke="#64748B"
               fontSize={11}
               fontFamily="var(--font-satoshi), 'Satoshi', sans-serif"
               tickLine={false}
               axisLine={{ stroke: "rgba(255, 255, 255, 0.1)" }}
+              width={42}
             />
             <Tooltip content={<CustomTooltip />} />
             <Area
