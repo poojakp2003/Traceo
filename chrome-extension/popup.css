@@ -462,6 +462,29 @@ input:checked + .slider:before {
   40%, 80% { transform: translateX(4px); }
 }
 
+/* Disabled / Tracking Paused State */
+#sync-now-btn.is-disabled,
+#sync-now-btn:disabled.is-disabled {
+  background-color: #ef4444 !important;
+  color: #ffffff;
+  cursor: not-allowed;
+  opacity: 0.85;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+  transform: none !important;
+}
+
+#sync-now-btn.is-disabled:hover,
+#sync-now-btn:disabled.is-disabled:hover {
+  background-color: #ef4444 !important;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.4) !important;
+  transform: none !important;
+}
+
+#sync-now-btn.is-disabled svg,
+#sync-now-btn:disabled.is-disabled svg {
+  transform: none !important;
+}
+
 /* Queue badge gentle slow small pop animation */
 .queue-badge.badge-pop {
   animation: badgePopAnim 1.4s cubic-bezier(0.25, 1, 0.5, 1);
