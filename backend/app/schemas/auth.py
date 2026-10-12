@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, computed_field
 
 
 class SignupRequest(BaseModel):
@@ -17,14 +17,38 @@ class LoginRequest(BaseModel):
     password: str = Field(min_length=1, max_length=128)
 
 
+class AcceptInstructionsRequest(BaseModel):
+    """Schema for accepting instructions and tracking consent."""
+
+    version: str = "1.0"
+
+
 class UserResponse(BaseModel):
     """Schema for returning user account details."""
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
     id: int
     email: EmailStr
     created_at: datetime
+    has_accepted_instructions: bool = False
+    instructions_accepted_at: datetime | None = None
+    instructions_version: str | None = None
+
+    @computed_field
+    @property
+    def hasAcceptedInstructions(self) -> bool:
+        return self.has_accepted_instructions
+
+    @computed_field
+    @property
+    def acceptedAt(self) -> datetime | None:
+        return self.instructions_accepted_at
+
+    @computed_field
+    @property
+    def instructionsVersion(self) -> str | None:
+        return self.instructions_version
 
 
 class TokenResponse(BaseModel):

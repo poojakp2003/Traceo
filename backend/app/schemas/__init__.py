@@ -1,4 +1,10 @@
-from app.schemas.auth import LoginRequest, SignupRequest, TokenResponse, UserResponse
+from app.schemas.auth import (
+    AcceptInstructionsRequest,
+    LoginRequest,
+    SignupRequest,
+    TokenResponse,
+    UserResponse,
+)
 from app.schemas.dashboard import (
     AppUsageItem,
     BrowserDomainItem,

@@ -7,6 +7,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { SignupPage } from "./pages/SignupPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { SettingsPage } from "./pages/SettingsPage";
+import { InstructionsPage } from "./pages/InstructionsPage";
 
 export default function App() {
   return (
@@ -17,6 +18,16 @@ export default function App() {
           {/* Public Authentication Routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+
+          {/* Instructions Consent Route */}
+          <Route
+            path="/instructions"
+            element={
+              <ProtectedRoute requireAcceptedInstructions={false}>
+                <InstructionsPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Protected Routes */}
           <Route

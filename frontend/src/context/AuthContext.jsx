@@ -1,6 +1,15 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { getMe, loginUser, logoutUser, signupUser } from "../api/auth";
+import { acceptInstructions as acceptInstructionsApi, getMe, loginUser, logoutUser, signupUser } from "../api/auth";
 import { ACCESS_KEY, clearTokens, saveTokens } from "../api/client";
+
+export const CURRENT_INSTRUCTIONS_VERSION = "1.0";
+
+export const isInstructionsAccepted = (user) => {
+  if (!user) return false;
+  const accepted = user.hasAcceptedInstructions ?? user.has_accepted_instructions;
+  const version = user.instructionsVersion ?? user.instructions_version;
+  return Boolean(accepted && version === CURRENT_INSTRUCTIONS_VERSION);
+};
 
 const AuthContext = createContext(null);
 
@@ -61,16 +70,24 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const acceptInstructions = async (version = CURRENT_INSTRUCTIONS_VERSION) => {
+    const updatedUser = await acceptInstructionsApi(version);
+    setUser(updatedUser);
+    return updatedUser;
+  };
+
   return (
     <AuthContext.Provider
       value={{
         token,
         user,
         isAuthenticated: !!token,
+        hasAcceptedInstructions: isInstructionsAccepted(user),
         loading,
         login,
         signup,
         logout,
+        acceptInstructions,
       }}
     >
       {children}
