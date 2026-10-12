@@ -155,4 +155,4 @@ def change_password(
 def logout(current_user: User = Depends(get_current_user)) -> dict[str, str]:
     """Stateless logout acknowledgment endpoint."""
     return {"message": "Logged out successfully"}
-
+
