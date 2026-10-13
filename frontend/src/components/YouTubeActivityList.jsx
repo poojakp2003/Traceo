@@ -97,7 +97,10 @@ export const YouTubeActivityList = ({ items = [], loading = false, totalWatchedF
           <div className="skeleton" style={{ height: "40px" }} />
         </div>
       ) : filteredItems.length > 0 ? (
-        <div className="table-responsive-wrapper">
+        <div
+          className="table-responsive-wrapper"
+          style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}
+        >
           <table
             style={{
               width: "100%",
@@ -213,7 +216,7 @@ export const YouTubeActivityList = ({ items = [], loading = false, totalWatchedF
           </table>
           {/* Pagination Controls */}
           {filteredItems.length > 0 && (
-            <div className="pagination-container">
+            <div className="pagination-container" style={{ marginTop: "auto" }}>
               <div
                 style={{
                   color: "var(--text-muted)",
