@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { acceptInstructions as acceptInstructionsApi, getMe, loginUser, logoutUser, signupUser } from "../api/auth";
 import { ACCESS_KEY, clearTokens, saveTokens } from "../api/client";
 
-export const CURRENT_INSTRUCTIONS_VERSION = "1.0";
+export const CURRENT_INSTRUCTIONS_VERSION = "1.0.0";
 
 export const isInstructionsAccepted = (user) => {
   if (!user) return false;

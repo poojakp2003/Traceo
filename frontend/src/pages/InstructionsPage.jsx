@@ -543,19 +543,31 @@ export const InstructionsPage = () => {
                 fontSize: "0.85rem",
               }}
             >
-              <div style={{ color: "var(--text-secondary)" }}>Direct Support Desk:</div>
-              <a
-                href="mailto:support@traceo.app"
-                style={{
-                  color: "var(--primary)",
-                  fontWeight: 600,
-                  textDecoration: "none",
-                  display: "inline-block",
-                  marginTop: "4px",
-                }}
-              >
-                support@traceo.app
-              </a>
+              <div style={{ color: "var(--text-secondary)", marginBottom: "6px" }}>Direct Support Desk:</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                <a
+                  href="mailto:devbypooja@gmail.com"
+                  style={{
+                    color: "var(--primary)",
+                    fontWeight: 600,
+                    textDecoration: "none",
+                    display: "inline-block",
+                  }}
+                >
+                  devbypooja@gmail.com
+                </a>
+                <a
+                  href="mailto:devbyneeraj@gmail.com"
+                  style={{
+                    color: "var(--primary)",
+                    fontWeight: 600,
+                    textDecoration: "none",
+                    display: "inline-block",
+                  }}
+                >
+                  devbyneeraj@gmail.com
+                </a>
+              </div>
             </div>
           </div>
         </div>
