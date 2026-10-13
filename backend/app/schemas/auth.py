@@ -105,11 +105,6 @@ def validate_strict_password(password: str, email: str | None = None) -> str:
     if normalized in COMMON_WEAK_PASSWORDS:
         raise ValueError("Password is too common or easily guessed. Please choose a stronger password.")
 
-    if email:
-        local_part = email.split("@")[0].lower()
-        if len(local_part) >= 3 and local_part in normalized:
-            raise ValueError("Password cannot contain your email username or personal identifier.")
-
     return password
 
 
@@ -128,11 +123,6 @@ class SignupRequest(BaseModel):
     @classmethod
     def validate_password_strength(cls, v: str) -> str:
         return validate_strict_password(v)
-
-    @model_validator(mode="after")
-    def validate_password_not_contain_email(self) -> "SignupRequest":
-        validate_strict_password(self.password, email=str(self.email))
-        return self
 
 
 class LoginRequest(BaseModel):

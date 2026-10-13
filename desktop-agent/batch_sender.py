@@ -77,6 +77,11 @@ class BatchSender:
 
     def _ensure_token(self) -> str | None:
         """Ensure a valid JWT access token is available, logging in if needed."""
+        # Reload latest config from disk if token is not cached so credentials changes apply immediately
+        if not self.config.access_token:
+            from config import load_config
+            self.config = load_config()
+
         if self.config.access_token:
             return self.config.access_token
 
@@ -129,7 +134,8 @@ class BatchSender:
 
         token = self._ensure_token()
         if not token:
-            print("[BatchSender] Skipping flush: unable to acquire valid authorization token.")
+            print("[BatchSender] Skipping flush: unable to acquire valid authorization token. Will retry after flush interval.")
+            self.last_flush_time = time.time()
             return 0
 
         batch_to_send = []

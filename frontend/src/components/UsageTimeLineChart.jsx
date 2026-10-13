@@ -11,8 +11,12 @@ import {
 import { Calendar, TrendingUp } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 
-// Format Y-axis tick values to whole hours (e.g. 0h, 1h, 2h, 3h)
-const formatYAxis = (value) => {
+// Format Y-axis tick values: in minutes mode format as 0m, 15m, 30m, 45m, 60m; in hours mode as 0h, 1h, 2h...
+const formatYTick = (value, isMinutesMode) => {
+  if (isMinutesMode) {
+    const mins = Math.round(value * 60);
+    return `${mins}m`;
+  }
   return `${Math.round(value)}h`;
 };
 
@@ -95,8 +99,17 @@ export const UsageTimeLineChart = ({ items = [], totalHours = 0, range = "7d" })
     );
   }
 
-  // Compute clean whole number ticks for the Y-axis (e.g. 0, 1, 2, 3...)
-  const getWholeNumberTicks = (maxVal) => {
+  // When usage is within 1 hour, scale in minutes (0m, 15m, 30m, 45m, 60m); otherwise scale in hours (1h, 2h, 3h...)
+  const isMinutesMode = maxHours <= 1.0;
+
+  const getYAxisConfig = (maxVal, isMinutes) => {
+    if (isMinutes) {
+      return {
+        ticks: [0, 0.25, 0.5, 0.75, 1.0],
+        domain: [0, 1.0],
+      };
+    }
+
     const ceiling = Math.max(1, Math.ceil(maxVal));
     let step = 1;
     if (ceiling > 24) step = 4;
@@ -110,11 +123,13 @@ export const UsageTimeLineChart = ({ items = [], totalHours = 0, range = "7d" })
     if (ticks[ticks.length - 1] < ceiling) {
       ticks.push(ticks[ticks.length - 1] + step);
     }
-    return ticks;
+    return {
+      ticks,
+      domain: [0, ticks[ticks.length - 1]],
+    };
   };
 
-  const yTicks = getWholeNumberTicks(maxHours);
-  const yDomain = [0, yTicks[yTicks.length - 1]];
+  const { ticks: yTicks, domain: yDomain } = getYAxisConfig(maxHours, isMinutesMode);
 
   // For "today" use the `day` field ("0h", "1h", …); for multi-day use the formatted date
   const isToday = range === "today";
@@ -162,8 +177,8 @@ export const UsageTimeLineChart = ({ items = [], totalHours = 0, range = "7d" })
             <YAxis
               domain={yDomain}
               ticks={yTicks}
-              allowDecimals={false}
-              tickFormatter={formatYAxis}
+              allowDecimals={isMinutesMode}
+              tickFormatter={(v) => formatYTick(v, isMinutesMode)}
               stroke={isDark ? "rgba(167, 139, 250, 0.45)" : "rgba(124, 58, 237, 0.45)"}
               tick={{
                 fill: isDark ? "#C4B5FD" : "#7C3AED",

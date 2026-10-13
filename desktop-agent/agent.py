@@ -162,17 +162,17 @@ def main() -> None:
         cfg = load_config()
         print("=== Desktop Agent Status ===")
         print(f"  Backend URL:      {cfg.backend_url}")
-        print(f"  Auth Token:       {'Configured ✓' if cfg.access_token else 'Not set (will use email/pwd)'}")
+        print(f"  Auth Token:       {'Configured [OK]' if cfg.access_token else 'Not set (will use email/pwd)'}")
         print(f"  Account Email:    {cfg.email or '(None)'}")
         print(f"  Poll Frequency:   {cfg.poll_interval_seconds}s")
         print(f"  Batch Trigger:    {cfg.batch_size} records or {cfg.flush_interval_seconds}s")
-        print(f"  System Startup:   {'Enabled ✓' if is_startup_installed() else 'Disabled'}")
+        print(f"  System Startup:   {'Enabled [OK]' if is_startup_installed() else 'Disabled'}")
         return
 
     if args.install_startup:
         success = install_startup()
         if success:
-            print("[Startup] Agent installed for automatic startup on system log in ✓")
+            print("[Startup] Agent installed for automatic startup on system log in [OK]")
         else:
             print("[Startup] Failed to configure automatic startup.", file=sys.stderr)
         return
@@ -180,7 +180,7 @@ def main() -> None:
     if args.uninstall_startup:
         success = uninstall_startup()
         if success:
-            print("[Startup] Agent removed from automatic system startup ✓")
+            print("[Startup] Agent removed from automatic system startup [OK]")
         else:
             print("[Startup] Startup configuration was not found or could not be removed.")
         return

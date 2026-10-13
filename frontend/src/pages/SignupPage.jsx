@@ -127,12 +127,6 @@ export const SignupPage = () => {
     const hasLower = /[a-z]/.test(password);
     const hasNumber = /[0-9]/.test(password);
     const hasSpecial = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/.test(password);
-
-    // Personal identifier check (cannot contain email username if 3+ chars)
-    const localPart = email.split("@")[0].toLowerCase().trim();
-    const containsEmailLocal =
-      localPart.length >= 3 && password.toLowerCase().includes(localPart);
-
     const isCommonWeak = COMMON_WEAK_PASSWORDS.has(password.toLowerCase().trim());
 
     const allPassed =
@@ -141,7 +135,6 @@ export const SignupPage = () => {
       hasLower &&
       hasNumber &&
       hasSpecial &&
-      !containsEmailLocal &&
       !isCommonWeak;
 
     return {
@@ -150,11 +143,10 @@ export const SignupPage = () => {
       hasLower,
       hasNumber,
       hasSpecial,
-      containsEmailLocal,
       isCommonWeak,
       allPassed,
     };
-  }, [password, email]);
+  }, [password]);
 
   // Password Strength Calculation (0 to 4)
   const passwordStrength = useMemo(() => {
@@ -167,10 +159,10 @@ export const SignupPage = () => {
     if (passwordRules.hasNumber) passedCount++;
     if (passwordRules.hasSpecial) passedCount++;
 
-    if (password.length >= 12 && passedCount === 5 && !passwordRules.containsEmailLocal) {
+    if (password.length >= 12 && passedCount === 5 && !passwordRules.isCommonWeak) {
       return { score: 4, label: "Very Strong", color: "#10B981" };
     }
-    if (passedCount >= 5 && !passwordRules.containsEmailLocal && !passwordRules.isCommonWeak) {
+    if (passedCount >= 5 && !passwordRules.isCommonWeak) {
       return { score: 4, label: "Strong", color: "#10B981" };
     }
     if (passedCount >= 4) {
@@ -557,16 +549,10 @@ export const SignupPage = () => {
                   label="1 special symbol (!@#$...)"
                 />
                 <RequirementItem
-                  met={!passwordRules.containsEmailLocal && !passwordRules.isCommonWeak}
-                  label="No common / email words"
+                  met={!passwordRules.isCommonWeak}
+                  label="Not a common weak word"
                 />
               </div>
-
-              {passwordRules.containsEmailLocal && (
-                <p style={{ color: "#FB7185", fontSize: "0.75rem", marginTop: "8px" }}>
-                  ⚠️ Password cannot contain your email identifier ({email.split("@")[0]}).
-                </p>
-              )}
 
               {passwordRules.isCommonWeak && (
                 <p style={{ color: "#FB7185", fontSize: "0.75rem", marginTop: "8px" }}>

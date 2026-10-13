@@ -91,10 +91,9 @@ def test_signup_password_missing_special_char(client: TestClient):
 
 
 def test_signup_password_contains_email_username(client: TestClient):
-    email = "johndoe@example.com"
+    email = f"johndoe_{uuid.uuid4().hex[:6]}@example.com"
     res = client.post("/auth/signup", json={"email": email, "password": "JohnDoePass123!"})
-    assert res.status_code == 422
-    assert "email username" in str(res.json())
+    assert res.status_code == 201
 
 
 def test_signup_common_weak_password_rejected(client: TestClient):
