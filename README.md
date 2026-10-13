@@ -179,7 +179,7 @@ Before getting started, make sure you have the following installed:
    DATABASE_URL=postgresql://postgres:your_password@localhost:5432/traceo_db
    SECRET_KEY=your_super_secret_jwt_random_key_here
    ```
-   *(Ensure the PostgreSQL database `tracker_db` is created in your PostgreSQL instance.)*
+   *(Ensure the PostgreSQL database `traceo_db` is created in your PostgreSQL instance.)*
 
 5. Run database migrations:
    ```bash
