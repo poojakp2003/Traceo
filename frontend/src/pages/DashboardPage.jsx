@@ -75,8 +75,8 @@ export const DashboardPage = () => {
       setLoading(false);
       if (isManualRefresh) {
         const elapsed = Date.now() - startTime;
-        if (elapsed < 900) {
-          await new Promise((resolve) => setTimeout(resolve, 900 - elapsed));
+        if (elapsed < 2800) {
+          await new Promise((resolve) => setTimeout(resolve, 2800 - elapsed));
         }
         setRefreshing(false);
       }
@@ -84,6 +84,7 @@ export const DashboardPage = () => {
   };
 
   const handleRefresh = () => {
+    if (refreshing) return;
     setRotationAngle((prev) => prev + 180);
     fetchData(true);
   };
@@ -120,14 +121,26 @@ export const DashboardPage = () => {
             <button
               type="button"
               onClick={handleRefresh}
-              disabled={refreshing}
+              aria-disabled={refreshing}
               className={`btn-reload ${refreshing ? "is-refreshing" : ""}`}
               aria-label="Refresh metrics"
+              style={{
+                cursor: "pointer",
+                WebkitTapHighlightColor: "transparent",
+                outline: "none",
+                userSelect: "none",
+              }}
             >
               <RefreshCw
                 size={16}
                 className="reload-icon"
-                style={{ transform: `rotate(${rotationAngle}deg)` }}
+                style={{
+                  transform: `rotate(${rotationAngle}deg)`,
+                  transition: "transform 2.8s ease-in-out",
+                  transformOrigin: "center",
+                  transformBox: "fill-box",
+                  display: "inline-block",
+                }}
               />
             </button>
           </div>
