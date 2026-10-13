@@ -10,6 +10,7 @@ import {
   Cell,
 } from "recharts";
 import { Clock, Layers } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
 
 const BAR_COLORS = [
   "#06B6D4", // Cyan
@@ -56,6 +57,8 @@ const CustomTooltip = ({ active, payload, isHoursMode }) => {
 };
 
 export const AppUsageBarChart = ({ items = [], totalDurationFormatted = "0 mins" }) => {
+  const { isDark } = useTheme();
+
   if (!items || items.length === 0) {
     return (
       <div
@@ -98,6 +101,42 @@ export const AppUsageBarChart = ({ items = [], totalDurationFormatted = "0 mins"
     };
   });
 
+  const maxDisplayVal = Math.max(
+    ...chartData.map((d) => d.displayValue || 0),
+    0
+  );
+
+  // Compute clean whole number ticks (e.g. 0, 1, 2, 3...)
+  const getWholeNumberTicks = (maxVal, isHours) => {
+    if (isHours) {
+      const ceiling = Math.max(1, Math.ceil(maxVal));
+      let step = 1;
+      if (ceiling > 24) step = 4;
+      else if (ceiling > 12) step = 2;
+      else step = 1;
+
+      const ticks = [];
+      for (let t = 0; t <= ceiling; t += step) {
+        ticks.push(t);
+      }
+      if (ticks[ticks.length - 1] < ceiling) {
+        ticks.push(ticks[ticks.length - 1] + step);
+      }
+      return ticks;
+    } else {
+      const ceiling = Math.max(5, Math.ceil(maxVal / 5) * 5);
+      const step = ceiling > 30 ? 10 : 5;
+      const ticks = [];
+      for (let t = 0; t <= ceiling; t += step) {
+        ticks.push(t);
+      }
+      return ticks;
+    }
+  };
+
+  const xTicks = getWholeNumberTicks(maxDisplayVal, isHoursMode);
+  const xDomain = [0, xTicks[xTicks.length - 1]];
+
   return (
     <div>
       <div style={{ height: 280, width: "100%", marginTop: "10px" }}>
@@ -105,32 +144,44 @@ export const AppUsageBarChart = ({ items = [], totalDurationFormatted = "0 mins"
           <BarChart
             data={chartData}
             layout="vertical"
-            margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+            margin={{ top: 5, right: 24, left: 8, bottom: 5 }}
           >
             <CartesianGrid
               strokeDasharray="3 3"
               horizontal={false}
-              stroke="rgba(255, 255, 255, 0.06)"
+              stroke={isDark ? "rgba(6, 182, 212, 0.08)" : "rgba(8, 145, 178, 0.1)"}
             />
             <XAxis
               type="number"
               dataKey="displayValue"
-              tickFormatter={(val) => (isHoursMode ? `${val}h` : `${val}m`)}
-              stroke="#64748B"
-              fontSize={11}
-              fontFamily="var(--font-satoshi), 'Satoshi', sans-serif"
-              tickLine={false}
-              axisLine={{ stroke: "rgba(255, 255, 255, 0.1)" }}
+              domain={xDomain}
+              ticks={xTicks}
+              allowDecimals={false}
+              tickFormatter={(val) => (isHoursMode ? `${Math.round(val)}h` : `${Math.round(val)}m`)}
+              stroke={isDark ? "rgba(6, 182, 212, 0.45)" : "rgba(8, 145, 178, 0.45)"}
+              tick={{
+                fill: isDark ? "#38BDF8" : "#0891B2",
+                fontSize: 11,
+                fontWeight: 600,
+                fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
+              }}
+              tickLine={{ stroke: isDark ? "rgba(6, 182, 212, 0.35)" : "rgba(8, 145, 178, 0.35)" }}
+              axisLine={{ stroke: isDark ? "rgba(6, 182, 212, 0.35)" : "rgba(8, 145, 178, 0.35)" }}
             />
             <YAxis
               dataKey="app_name"
               type="category"
-              stroke="#94A3B8"
-              fontSize={11}
+              stroke={isDark ? "rgba(255, 255, 255, 0.2)" : "rgba(0, 0, 0, 0.2)"}
+              tick={{
+                fill: isDark ? "#CBD5E1" : "#334155",
+                fontSize: 11,
+                fontWeight: 500,
+                fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
+              }}
               tickLine={false}
-              axisLine={{ stroke: "rgba(255, 255, 255, 0.1)" }}
-              width={76}
-              tickFormatter={(name) => (name && name.length > 10 ? `${name.slice(0, 9)}…` : name)}
+              axisLine={{ stroke: isDark ? "rgba(255, 255, 255, 0.15)" : "rgba(0, 0, 0, 0.15)" }}
+              width={82}
+              tickFormatter={(name) => (name && name.length > 12 ? `${name.slice(0, 11)}…` : name)}
             />
             <Tooltip
               content={<CustomTooltip isHoursMode={isHoursMode} />}

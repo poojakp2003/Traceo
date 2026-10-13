@@ -9,16 +9,11 @@ import {
   CartesianGrid,
 } from "recharts";
 import { Calendar, TrendingUp } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
 
-// Smart Y-axis formatter: minutes when total is < 1 hr, hours otherwise
-const formatYAxis = (value, maxHours) => {
-  if (maxHours < 1) {
-    // display in minutes
-    const mins = Math.round(value * 60);
-    return `${mins}m`;
-  }
-  // display in hours
-  return `${value % 1 === 0 ? value : +value.toFixed(2)}h`;
+// Format Y-axis tick values to whole hours (e.g. 0h, 1h, 2h, 3h)
+const formatYAxis = (value) => {
+  return `${Math.round(value)}h`;
 };
 
 // Helper to format date string into DD/MM format (e.g., "2026-10-07" -> "07/10")
@@ -61,7 +56,7 @@ const CustomTooltip = ({ active, payload, label }) => {
         <div style={{ color: "#94A3B8", fontSize: "0.75rem", marginBottom: "6px" }}>
           {data.date}
         </div>
-        <div style={{ color: "#06B6D4", fontSize: "0.9rem", fontWeight: 600 }}>
+        <div style={{ color: "#A78BFA", fontSize: "0.9rem", fontWeight: 600 }}>
           {data.hours} hrs ({data.duration_formatted})
         </div>
         <div style={{ color: "#94A3B8", fontSize: "0.8rem", marginTop: "2px" }}>
@@ -74,7 +69,9 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export const UsageTimeLineChart = ({ items = [], totalHours = 0, range = "7d" }) => {
-  // Determine the max value so we know which unit to use on the Y-axis
+  const { isDark } = useTheme();
+
+  // Determine the max value so we know the ceiling on the Y-axis
   const maxHours = items.length > 0 ? Math.max(...items.map((d) => d.hours || 0)) : 0;
   if (!items || items.length === 0) {
     return (
@@ -98,6 +95,27 @@ export const UsageTimeLineChart = ({ items = [], totalHours = 0, range = "7d" })
     );
   }
 
+  // Compute clean whole number ticks for the Y-axis (e.g. 0, 1, 2, 3...)
+  const getWholeNumberTicks = (maxVal) => {
+    const ceiling = Math.max(1, Math.ceil(maxVal));
+    let step = 1;
+    if (ceiling > 24) step = 4;
+    else if (ceiling > 12) step = 2;
+    else step = 1;
+
+    const ticks = [];
+    for (let t = 0; t <= ceiling; t += step) {
+      ticks.push(t);
+    }
+    if (ticks[ticks.length - 1] < ceiling) {
+      ticks.push(ticks[ticks.length - 1] + step);
+    }
+    return ticks;
+  };
+
+  const yTicks = getWholeNumberTicks(maxHours);
+  const yDomain = [0, yTicks[yTicks.length - 1]];
+
   // For "today" use the `day` field ("0h", "1h", …); for multi-day use the formatted date
   const isToday = range === "today";
   const chartData = items.map((point) => {
@@ -114,7 +132,7 @@ export const UsageTimeLineChart = ({ items = [], totalHours = 0, range = "7d" })
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={chartData}
-            margin={{ top: 10, right: 15, left: -15, bottom: 5 }}
+            margin={{ top: 10, right: 18, left: 6, bottom: 5 }}
           >
             <defs>
               <linearGradient id="usageGradient" x1="0" y1="0" x2="0" y2="1">
@@ -124,27 +142,39 @@ export const UsageTimeLineChart = ({ items = [], totalHours = 0, range = "7d" })
             </defs>
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="rgba(255, 255, 255, 0.06)"
+              stroke={isDark ? "rgba(139, 92, 246, 0.08)" : "rgba(124, 58, 237, 0.1)"}
               vertical={false}
             />
             <XAxis
               dataKey="displayLabel"
-              stroke="#94A3B8"
-              fontSize={11}
-              fontFamily="var(--font-satoshi), 'Satoshi', sans-serif"
-              tickLine={false}
-              axisLine={{ stroke: "rgba(255, 255, 255, 0.1)" }}
+              stroke={isDark ? "rgba(167, 139, 250, 0.3)" : "rgba(124, 58, 237, 0.3)"}
+              tick={{
+                fill: isDark ? "#CBD5E1" : "#334155",
+                fontSize: 11,
+                fontWeight: 500,
+                fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
+              }}
+              tickLine={{ stroke: isDark ? "rgba(167, 139, 250, 0.25)" : "rgba(124, 58, 237, 0.25)" }}
+              axisLine={{ stroke: isDark ? "rgba(167, 139, 250, 0.25)" : "rgba(124, 58, 237, 0.25)" }}
               minTickGap={isToday ? 0 : 14}
               interval={isToday ? 2 : "preserveStartEnd"}
             />
             <YAxis
-              tickFormatter={(v) => formatYAxis(v, maxHours)}
-              stroke="#64748B"
-              fontSize={11}
-              fontFamily="var(--font-satoshi), 'Satoshi', sans-serif"
-              tickLine={false}
-              axisLine={{ stroke: "rgba(255, 255, 255, 0.1)" }}
-              width={42}
+              domain={yDomain}
+              ticks={yTicks}
+              allowDecimals={false}
+              tickFormatter={formatYAxis}
+              stroke={isDark ? "rgba(167, 139, 250, 0.45)" : "rgba(124, 58, 237, 0.45)"}
+              tick={{
+                fill: isDark ? "#C4B5FD" : "#7C3AED",
+                fontSize: 11,
+                fontWeight: 600,
+                fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
+              }}
+              tickLine={{ stroke: isDark ? "rgba(167, 139, 250, 0.35)" : "rgba(124, 58, 237, 0.35)" }}
+              axisLine={{ stroke: isDark ? "rgba(167, 139, 250, 0.35)" : "rgba(124, 58, 237, 0.35)" }}
+              width={48}
+              tickMargin={6}
             />
             <Tooltip content={<CustomTooltip />} />
             <Area
