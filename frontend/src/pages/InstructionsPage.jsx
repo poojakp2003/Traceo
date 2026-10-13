@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   Youtube,
 } from "lucide-react";
+import { Navbar } from "../components/Navbar";
 import { useAuth, CURRENT_INSTRUCTIONS_VERSION } from "../context/AuthContext";
 
 export const InstructionsPage = () => {
@@ -70,17 +71,17 @@ export const InstructionsPage = () => {
     : null;
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "var(--bg-main)",
-        color: "var(--text-primary)",
-        padding: "clamp(16px, 4vw, 40px) clamp(16px, 4vw, 24px)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
-    >
+    <div style={{ minHeight: "100vh", backgroundColor: "var(--bg-main)" }}>
+      {hasAcceptedInstructions && <Navbar />}
+
+      <div
+        style={{
+          padding: "clamp(20px, 4vw, 40px) clamp(16px, 4vw, 24px)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
       <div
         className="animate-fade-in"
         style={{
@@ -579,108 +580,111 @@ export const InstructionsPage = () => {
           </div>
         )}
 
-        {/* Consent & Acceptance Footer Card */}
-        <div
-          className="glass-card"
-          style={{
-            padding: "clamp(20px, 4vw, 30px)",
-            borderRadius: "var(--radius-lg)",
-            border: "1px solid var(--border-subtle)",
-            display: "flex",
-            flexDirection: "column",
-            gap: "20px",
-          }}
-        >
-          {/* Agreement Checkbox */}
-          <label
-            htmlFor="agree-checkbox"
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "14px",
-              cursor: "pointer",
-              userSelect: "none",
-            }}
-          >
-            <input
-              id="agree-checkbox"
-              type="checkbox"
-              checked={agreed}
-              onChange={(e) => setAgreed(e.target.checked)}
-              style={{
-                width: "20px",
-                height: "20px",
-                marginTop: "2px",
-                cursor: "pointer",
-                accentColor: "var(--primary)",
-              }}
-            />
-            <span
-              style={{
-                fontSize: "clamp(0.9rem, 2.5vw, 1rem)",
-                fontWeight: 500,
-                color: agreed ? "var(--text-primary)" : "var(--text-secondary)",
-                lineHeight: 1.5,
-              }}
-            >
-              I have read, understood, and agree to the Traceo tracker instructions, guidelines, and telemetry data collection policies.
-            </span>
-          </label>
-
-          {/* Action Buttons */}
+        {/* Consent & Acceptance Footer Card - Only shown for onboarding users who haven't accepted yet */}
+        {!hasAcceptedInstructions && (
           <div
+            className="glass-card"
             style={{
+              padding: "clamp(20px, 4vw, 30px)",
+              borderRadius: "var(--radius-lg)",
+              border: "1px solid var(--border-subtle)",
               display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
-              gap: "14px",
-              borderTop: "1px solid var(--border-subtle)",
-              paddingTop: "18px",
+              flexDirection: "column",
+              gap: "20px",
             }}
           >
-            <button
-              type="button"
-              onClick={handleDecline}
-              disabled={declining || submitting}
-              className="btn btn-secondary"
+            {/* Agreement Checkbox */}
+            <label
+              htmlFor="agree-checkbox"
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "10px 20px",
-                fontSize: "0.9rem",
-                color: "var(--text-secondary)",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "14px",
+                cursor: "pointer",
+                userSelect: "none",
               }}
             >
-              <LogOut size={16} />
-              {declining ? "Logging out..." : "Decline & Sign Out"}
-            </button>
+              <input
+                id="agree-checkbox"
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                style={{
+                  width: "20px",
+                  height: "20px",
+                  marginTop: "2px",
+                  cursor: "pointer",
+                  accentColor: "var(--primary)",
+                }}
+              />
+              <span
+                style={{
+                  fontSize: "clamp(0.9rem, 2.5vw, 1rem)",
+                  fontWeight: 500,
+                  color: agreed ? "var(--text-primary)" : "var(--text-secondary)",
+                  lineHeight: 1.5,
+                }}
+              >
+                I have read, understood, and agree to the Traceo tracker instructions, guidelines, and telemetry data collection policies.
+              </span>
+            </label>
 
-            <button
-              type="button"
-              onClick={handleAccept}
-              disabled={(!agreed && !hasAcceptedInstructions) || submitting}
-              className="btn btn-primary"
+            {/* Action Buttons */}
+            <div
               style={{
-                display: "inline-flex",
+                display: "flex",
                 alignItems: "center",
-                gap: "10px",
-                padding: "12px 28px",
-                fontSize: "0.95rem",
-                fontWeight: 600,
-                opacity: (agreed || hasAcceptedInstructions) ? 1 : 0.45,
-                cursor: (agreed || hasAcceptedInstructions) ? "pointer" : "not-allowed",
-                boxShadow: (agreed || hasAcceptedInstructions) ? "0 0 20px rgba(6, 182, 212, 0.4)" : "none",
-                transition: "all 0.2s ease-in-out",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: "14px",
+                borderTop: "1px solid var(--border-subtle)",
+                paddingTop: "18px",
               }}
             >
-              {submitting ? "Saving acceptance..." : "Accept & Continue"}
-              {!submitting && <ArrowRight size={18} />}
-            </button>
+              <button
+                type="button"
+                onClick={handleDecline}
+                disabled={declining || submitting}
+                className="btn btn-secondary"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "10px 20px",
+                  fontSize: "0.9rem",
+                  color: "var(--text-secondary)",
+                }}
+              >
+                <LogOut size={16} />
+                {declining ? "Logging out..." : "Decline & Sign Out"}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleAccept}
+                disabled={!agreed || submitting}
+                className="btn btn-primary"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  padding: "12px 28px",
+                  fontSize: "0.95rem",
+                  fontWeight: 600,
+                  opacity: agreed ? 1 : 0.45,
+                  cursor: agreed ? "pointer" : "not-allowed",
+                  boxShadow: agreed ? "0 0 20px rgba(6, 182, 212, 0.4)" : "none",
+                  transition: "all 0.2s ease-in-out",
+                }}
+              >
+                {submitting ? "Saving acceptance..." : "Accept & Continue"}
+                {!submitting && <ArrowRight size={18} />}
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
+  </div>
   );
 };
