@@ -1168,35 +1168,58 @@ input:-webkit-autofill:focus {
   background: var(--bg-item-row, rgba(255, 255, 255, 0.04));
   border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
   color: var(--text-secondary, #94a3b8);
-  cursor: pointer;
+  cursor: pointer !important;
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  outline: none !important;
+  overflow: hidden;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
 }
 
-.btn-reload:focus,
-.btn-reload:focus-visible {
-  outline: none;
+.btn-reload::before,
+.btn-reload::after {
+  display: none !important;
+  content: none !important;
 }
 
-.btn-reload:hover:not(:disabled) {
+.btn-reload:focus,
+.btn-reload:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  cursor: pointer !important;
+}
+
+.btn-reload:hover {
   background: var(--bg-item-row-hover, rgba(255, 255, 255, 0.08));
   border-color: rgba(255, 255, 255, 0.2);
   color: var(--text-primary, #ffffff);
   box-shadow: 0 0 12px rgba(255, 255, 255, 0.05);
   transform: translateY(-1px);
+  cursor: pointer !important;
 }
 
-.btn-reload:hover:not(:disabled) .reload-icon {
+.btn-reload:hover .reload-icon {
   color: var(--text-primary, #ffffff);
 }
 
-.btn-reload:active:not(:disabled) {
+.btn-reload:active {
   transform: scale(0.92);
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  cursor: pointer !important;
 }
 
-.btn-reload:disabled {
-  cursor: not-allowed;
+.btn-reload:disabled,
+.btn-reload[disabled],
+.btn-reload[aria-disabled="true"],
+.btn-reload.is-refreshing {
+  cursor: pointer !important;
 }
 
 /* Active reloading state */
@@ -1204,11 +1227,17 @@ input:-webkit-autofill:focus {
   background: var(--bg-item-row-hover, rgba(255, 255, 255, 0.08));
   border-color: rgba(255, 255, 255, 0.2);
   color: var(--text-primary, #ffffff);
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  cursor: pointer !important;
 }
 
 .reload-icon {
-  transition: transform 0.9s ease-in-out, color 0.25s ease;
+  display: inline-block;
   transform-origin: center;
+  transform-box: fill-box;
+  transition: transform 2.8s ease-in-out, color 0.25s ease !important;
 }
 
 /* ------------------------------------------------------------- */
