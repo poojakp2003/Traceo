@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import { ChevronLeft, ChevronRight, ExternalLink, Play, Search, Video } from "lucide-react";
 
 const PAGE_SIZE = 10;
+const ROW_HEIGHT = "62px";
+const ROW_GAP = "6px";
+const CELL_PADDING = "10px 12px";
+const INNER_MIN_HEIGHT = "42px";
 
 export const YouTubeActivityList = ({ items = [], loading = false, totalWatchedFormatted = "0 mins" }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -99,14 +103,15 @@ export const YouTubeActivityList = ({ items = [], loading = false, totalWatchedF
       ) : filteredItems.length > 0 ? (
         <div
           className="table-responsive-wrapper"
-          style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}
+          style={{ flex: 1, display: "flex", flexDirection: "column" }}
         >
           <table
             style={{
               width: "100%",
               borderCollapse: "separate",
-              borderSpacing: "0 6px",
+              borderSpacing: `0 ${ROW_GAP}`,
               fontSize: "0.9rem",
+              flexShrink: 0,
             }}
           >
             <thead>
@@ -120,6 +125,7 @@ export const YouTubeActivityList = ({ items = [], loading = false, totalWatchedF
                 <tr
                   key={yt.video_id || idx}
                   style={{
+                    height: ROW_HEIGHT,
                     background: "var(--bg-item-row)",
                     borderRadius: "var(--radius-sm)",
                     transition: "background 0.2s ease",
@@ -127,8 +133,15 @@ export const YouTubeActivityList = ({ items = [], loading = false, totalWatchedF
                   onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-item-row-hover)")}
                   onMouseLeave={(e) => (e.currentTarget.style.background = "var(--bg-item-row)")}
                 >
-                  <td style={{ padding: "10px 12px", borderTopLeftRadius: "8px", borderBottomLeftRadius: "8px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
+                  <td
+                    style={{
+                      height: ROW_HEIGHT,
+                      padding: CELL_PADDING,
+                      borderTopLeftRadius: "8px",
+                      borderBottomLeftRadius: "8px",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0, minHeight: INNER_MIN_HEIGHT }}>
                       <div
                         style={{
                           width: "28px",
@@ -170,19 +183,20 @@ export const YouTubeActivityList = ({ items = [], loading = false, totalWatchedF
                   </td>
                   <td
                     style={{
-                      padding: "10px 12px",
+                      height: ROW_HEIGHT,
+                      padding: CELL_PADDING,
                       textAlign: "right",
                       borderTopRightRadius: "8px",
                       borderBottomRightRadius: "8px",
                     }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "14px" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "14px", minHeight: INNER_MIN_HEIGHT }}>
                       <span
                         style={{
                           color: "var(--text-muted)",
                           fontSize: "0.85rem",
-                          minWidth: "18px",
-                          textAlign: "center",
+                          minWidth: "24px",
+                          textAlign: "right",
                           fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
                           fontVariantNumeric: "tabular-nums",
                           fontWeight: 600,
@@ -202,8 +216,10 @@ export const YouTubeActivityList = ({ items = [], loading = false, totalWatchedF
                           background: "rgba(244, 63, 94, 0.1)",
                           borderRadius: "var(--radius-sm)",
                           border: "1px solid rgba(244, 63, 94, 0.2)",
-                          minWidth: "60px",
+                          minWidth: "76px",
                           textAlign: "center",
+                          display: "inline-block",
+                          boxSizing: "border-box",
                         }}
                       >
                         {yt.watched_formatted}
