@@ -19,6 +19,7 @@ import {
   Youtube,
 } from "lucide-react";
 import { Navbar } from "../components/Navbar";
+import { Footer } from "../components/Footer";
 import { useAuth, CURRENT_INSTRUCTIONS_VERSION } from "../context/AuthContext";
 
 export const InstructionsPage = () => {
@@ -71,11 +72,12 @@ export const InstructionsPage = () => {
     : null;
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "var(--bg-main)" }}>
+    <div style={{ minHeight: "100vh", backgroundColor: "var(--bg-main)", display: "flex", flexDirection: "column" }}>
       {hasAcceptedInstructions && <Navbar />}
 
       <div
         style={{
+          flex: 1,
           padding: "clamp(20px, 4vw, 40px) clamp(16px, 4vw, 24px)",
           display: "flex",
           flexDirection: "column",
@@ -697,6 +699,8 @@ export const InstructionsPage = () => {
         )}
       </div>
     </div>
+
+    <Footer />
   </div>
   );
 };

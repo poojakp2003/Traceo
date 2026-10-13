@@ -15,6 +15,7 @@ import { getPermissions, updatePermissions } from "../api/permissions";
 import { Navbar } from "../components/Navbar";
 import { CapsuleSwitch } from "../components/CapsuleSwitch";
 import { useTheme } from "../context/ThemeContext";
+import { Footer } from "../components/Footer";
 
 export const SettingsPage = () => {
   const { theme, toggleTheme, isDark } = useTheme();
@@ -132,7 +133,7 @@ export const SettingsPage = () => {
   ];
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "var(--bg-main)" }}>
+    <div style={{ minHeight: "100vh", backgroundColor: "var(--bg-main)", display: "flex", flexDirection: "column" }}>
       <Navbar />
 
       {/* Top-Right Small Box Toast Notification (positioned directly below email and Logout) */}
@@ -366,6 +367,8 @@ export const SettingsPage = () => {
           )}
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 };
