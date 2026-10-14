@@ -1241,6 +1241,24 @@ input:-webkit-autofill:focus {
 }
 
 /* ------------------------------------------------------------- */
+/* Settings Page Sync Button cursor behavior                     */
+/* ------------------------------------------------------------- */
+.settings-sync-btn,
+.settings-sync-btn:hover,
+.settings-sync-btn:active,
+.settings-sync-btn:disabled,
+.settings-sync-btn[disabled],
+.settings-sync-btn[aria-disabled="true"],
+.settings-sync-btn.is-refreshing,
+.settings-sync-btn.is-loading {
+  cursor: pointer !important;
+}
+
+.settings-sync-btn[aria-disabled="true"] {
+  opacity: 0.6;
+}
+
+/* ------------------------------------------------------------- */
 /* Satoshi Search Input Typography                               */
 /* ------------------------------------------------------------- */
 
