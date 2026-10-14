@@ -31,7 +31,6 @@ export const DashboardPage = () => {
   const [range, setRange] = useState("today");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [rotationAngle, setRotationAngle] = useState(0);
   const [summary, setSummary] = useState(null);
   const [appsData, setAppsData] = useState(null);
   const [timelineData, setTimelineData] = useState(null);
@@ -75,8 +74,8 @@ export const DashboardPage = () => {
       setLoading(false);
       if (isManualRefresh) {
         const elapsed = Date.now() - startTime;
-        if (elapsed < 2800) {
-          await new Promise((resolve) => setTimeout(resolve, 2800 - elapsed));
+        if (elapsed < 1600) {
+          await new Promise((resolve) => setTimeout(resolve, 1600 - elapsed));
         }
         setRefreshing(false);
       }
@@ -85,7 +84,6 @@ export const DashboardPage = () => {
 
   const handleRefresh = () => {
     if (refreshing) return;
-    setRotationAngle((prev) => prev + 180);
     fetchData(true);
   };
 
@@ -133,14 +131,7 @@ export const DashboardPage = () => {
             >
               <RefreshCw
                 size={16}
-                className="reload-icon"
-                style={{
-                  transform: `rotate(${rotationAngle}deg)`,
-                  transition: "transform 2.8s ease-in-out",
-                  transformOrigin: "center",
-                  transformBox: "fill-box",
-                  display: "inline-block",
-                }}
+                className={`reload-icon ${refreshing ? "animate-spin-slow" : ""}`}
               />
             </button>
           </div>
