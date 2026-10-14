@@ -13,9 +13,10 @@ export const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Check if session expired
+  // Check query parameters
   const queryParams = new URLSearchParams(location.search);
   const sessionExpired = queryParams.get("session_expired");
+  const instructionsDeclined = queryParams.get("instructions_declined");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -69,6 +70,25 @@ export const LoginPage = () => {
         </div>
 
         {/* Notifications */}
+        {instructionsDeclined && (
+          <div style={{
+            padding: "10px 14px",
+            background: "rgba(244, 63, 94, 0.15)",
+            border: "1px solid rgba(244, 63, 94, 0.3)",
+            borderRadius: "var(--radius-sm)",
+            color: "#FB7185",
+            fontSize: "0.85rem",
+            marginBottom: "18px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            wordBreak: "break-word",
+          }}>
+            <AlertCircle size={16} style={{ flexShrink: 0 }} />
+            <span>You declined the tracker guidelines. Acceptance is required to access Traceo.</span>
+          </div>
+        )}
+
         {sessionExpired && (
           <div style={{
             padding: "10px 14px",

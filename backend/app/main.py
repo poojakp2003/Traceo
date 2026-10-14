@@ -10,6 +10,7 @@ from app.routers.auth import router as auth_router
 from app.routers.dashboard import router as dashboard_router
 from app.routers.permissions import router as permissions_router
 from app.routers.tracking import router as tracking_router
+from app.routers.users import router as users_router
 
 
 @asynccontextmanager
@@ -29,9 +30,16 @@ async def lifespan(app: FastAPI):
         with SessionLocal() as db:
             cond = or_(*(BrowserActivity.url.ilike(f"%{h}%") for h in ignored_hosts))
             deleted = db.query(BrowserActivity).filter(cond).delete(synchronize_session=False)
-            db.commit()
             if deleted:
                 print(f"[Tracker API] Purged {deleted} legacy internal project URL records.")
+            try:
+                db.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS has_accepted_instructions BOOLEAN DEFAULT FALSE NOT NULL"))
+                db.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS instructions_accepted_at TIMESTAMP WITH TIME ZONE"))
+                db.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS instructions_version VARCHAR(50)"))
+                db.commit()
+            except Exception as e:
+                db.rollback()
+                print(f"[Tracker API] Column check notice: {e}")
     except Exception as exc:
         print(f"[Tracker API] Startup cleanup notice: {exc}")
     yield
@@ -53,6 +61,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(users_router)
 app.include_router(permissions_router)
 app.include_router(tracking_router)
 app.include_router(dashboard_router)

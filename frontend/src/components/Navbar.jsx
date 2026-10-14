@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Activity, LayoutDashboard, LogOut, Menu, Settings, User as UserIcon, X } from "lucide-react";
+import { Activity, LayoutDashboard, LogOut, Menu, Settings, ShieldCheck, User as UserIcon, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 export const Navbar = () => {
@@ -85,6 +85,14 @@ export const Navbar = () => {
             <span>Dashboard</span>
           </Link>
           <Link
+            to="/instructions"
+            className={`nav-link ${location.pathname === "/instructions" ? "active" : ""}`}
+            style={{ display: "flex", alignItems: "center", gap: "6px" }}
+          >
+            <ShieldCheck size={16} />
+            <span>Guidelines</span>
+          </Link>
+          <Link
             to="/settings"
             className={`nav-link ${location.pathname === "/settings" ? "active" : ""}`}
             style={{ display: "flex", alignItems: "center", gap: "6px" }}
@@ -146,6 +154,14 @@ export const Navbar = () => {
               >
                 <LayoutDashboard size={18} />
                 <span>Dashboard</span>
+              </Link>
+              <Link
+                to="/instructions"
+                className={`navbar-mobile-link ${location.pathname === "/instructions" ? "active" : ""}`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <ShieldCheck size={18} />
+                <span>Guidelines</span>
               </Link>
               <Link
                 to="/settings"

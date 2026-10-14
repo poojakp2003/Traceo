@@ -23,3 +23,8 @@ export const logoutUser = async () => {
     clearTokens();
   }
 };
+
+export const acceptInstructions = async (version = "1.0") => {
+  const response = await apiClient.post("/api/users/accept-instructions", { version });
+  return response.data;
+};

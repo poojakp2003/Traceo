@@ -3,20 +3,33 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { ScrollToTop } from "./components/ScrollToTop";
 import { LoginPage } from "./pages/LoginPage";
 import { SignupPage } from "./pages/SignupPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { SettingsPage } from "./pages/SettingsPage";
+import { InstructionsPage } from "./pages/InstructionsPage";
 
 export default function App() {
   return (
     <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
-        <Routes>
+          <ScrollToTop />
+          <Routes>
           {/* Public Authentication Routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+
+          {/* Instructions Consent Route */}
+          <Route
+            path="/instructions"
+            element={
+              <ProtectedRoute requireAcceptedInstructions={false}>
+                <InstructionsPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Protected Routes */}
           <Route

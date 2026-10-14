@@ -26,6 +26,7 @@ import { StatCard } from "../components/StatCard";
 import { UsageTimeLineChart } from "../components/UsageTimeLineChart";
 import { YouTubeActivityList } from "../components/YouTubeActivityList";
 import { TopVisitedDomains } from "../components/TopVisitedDomains";
+import { Footer } from "../components/Footer";
 
 export const DashboardPage = () => {
   const [range, setRange] = useState("today");
@@ -92,10 +93,10 @@ export const DashboardPage = () => {
   }, [range]);
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "var(--bg-main)" }}>
+    <div style={{ minHeight: "100vh", backgroundColor: "var(--bg-main)", display: "flex", flexDirection: "column" }}>
       <Navbar />
 
-      <main className="container animate-fade-in" style={{ paddingBottom: "60px" }}>
+      <main className="container animate-fade-in" style={{ flex: 1, paddingBottom: "48px" }}>
         {/* Top bar: Title & Range Selector */}
         <div
           style={{
@@ -310,6 +311,8 @@ export const DashboardPage = () => {
           range={range}
         />
       </main>
+
+      <Footer />
     </div>
   );
 };
