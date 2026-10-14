@@ -390,13 +390,13 @@ async function flushQueue() {
       await chrome.storage.local.set({ eventQueue: validQueue });
     }
 
-    if (validQueue.length === 0) return { success: true, count: 0 };
-
     if (!token || authState === "expired") {
       console.warn("[Tracker] Cannot flush queue: not authenticated. Please log in via popup.");
       await chrome.storage.local.set({ syncStatus: "Authentication Required" });
       return { success: false, error: "Authentication Required" };
     }
+
+    if (validQueue.length === 0) return { success: true, count: 0 };
 
     const batch = validQueue.slice(0, 30);
     const sentIds = new Set(batch.map((e) => e.id));
@@ -549,9 +549,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === "SYNC_NOW") {
-    chrome.storage.local.get(["trackingEnabled"]).then(({ trackingEnabled }) => {
+    chrome.storage.local.get(["trackingEnabled", "token", "authState"]).then(({ trackingEnabled, token, authState }) => {
       if (trackingEnabled === false) {
         sendResponse({ success: false, error: "Tracking paused" });
+        return;
+      }
+      if (!token || authState === "expired") {
+        sendResponse({ success: false, error: "Authentication Required" });
         return;
       }
       flushQueue().then((res) => sendResponse(res));

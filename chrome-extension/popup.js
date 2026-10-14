@@ -294,9 +294,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       const isTracking = data.trackingEnabled !== false;
       trackingToggle.checked = isTracking;
 
-      // Sync button state based on master tracking toggle
-      if (!isTracking) {
-        if (syncNowBtn.classList.contains("is-synced") || isButtonSynced || data.syncStatus === "Synced") {
+      // Sync button state: disabled when tracking is paused OR user is logged out / session expired
+      const isSyncDisabled = !isTracking || !loggedIn;
+
+      if (isSyncDisabled) {
+        if (!loggedIn) {
+          isButtonSynced = false;
+        } else if (syncNowBtn.classList.contains("is-synced") || isButtonSynced || data.syncStatus === "Synced") {
           isButtonSynced = true;
         }
         if (revertTimeoutId) {
@@ -420,8 +424,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Manual Sync Button with smooth reload animation
   syncNowBtn.addEventListener("click", async () => {
     if (syncNowBtn.disabled) return;
-    const { trackingEnabled } = await chrome.storage.local.get(["trackingEnabled"]);
-    if (trackingEnabled === false) return;
+    const { trackingEnabled, token, authState } = await chrome.storage.local.get([
+      "trackingEnabled",
+      "token",
+      "authState",
+    ]);
+    const isSessionExpired = authState === "expired";
+    const isLoggedIn = Boolean(token) && !isSessionExpired;
+    if (trackingEnabled === false || !isLoggedIn) {
+      isButtonSynced = false;
+      renderSyncButtonDisabled();
+      return;
+    }
 
     if (revertTimeoutId) {
       clearTimeout(revertTimeoutId);
@@ -457,9 +471,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       await new Promise((r) => setTimeout(r, 1500 - elapsed));
     }
 
-    const curData = await chrome.storage.local.get(["trackingEnabled"]);
-    if (curData.trackingEnabled === false) {
-      isButtonSynced = !syncError;
+    const curData = await chrome.storage.local.get(["trackingEnabled", "token", "authState"]);
+    const curIsLoggedIn = Boolean(curData.token) && curData.authState !== "expired";
+    if (curData.trackingEnabled === false || !curIsLoggedIn) {
+      isButtonSynced = false;
       renderSyncButtonDisabled();
       await refreshUI();
       return;
@@ -488,10 +503,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Revert back to default state after 2200ms
     revertTimeoutId = setTimeout(async () => {
-      const latest = await chrome.storage.local.get(["trackingEnabled"]);
-      if (latest.trackingEnabled !== false) {
+      const latest = await chrome.storage.local.get(["trackingEnabled", "token", "authState"]);
+      const latestIsLoggedIn = Boolean(latest.token) && latest.authState !== "expired";
+      if (latest.trackingEnabled !== false && latestIsLoggedIn) {
         isButtonSynced = false;
         renderSyncButtonDefault();
+      } else {
+        renderSyncButtonDisabled();
       }
     }, 2200);
   });
@@ -570,6 +588,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Logout Button
   logoutBtn.addEventListener("click", async () => {
+    isButtonSynced = false;
+    if (revertTimeoutId) {
+      clearTimeout(revertTimeoutId);
+      revertTimeoutId = null;
+    }
+    renderSyncButtonDisabled();
     await chrome.storage.local.remove(["token", "refreshToken", "authState", "userEmail"]);
     await chrome.storage.local.set({ syncStatus: "Ready" });
     clearBadge();
