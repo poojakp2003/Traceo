@@ -1237,7 +1237,6 @@ input:-webkit-autofill:focus {
   display: inline-block;
   transform-origin: center;
   transform-box: fill-box;
-  transition: transform 2.8s ease-in-out, color 0.25s ease !important;
 }
 
 /* ------------------------------------------------------------- */
