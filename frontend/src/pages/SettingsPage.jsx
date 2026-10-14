@@ -67,6 +67,12 @@ export const SettingsPage = () => {
     }
   };
 
+  const handleSync = () => {
+    if (loading) return;
+    if (isRefreshing) return;
+    loadPermissions(true);
+  };
+
   useEffect(() => {
     loadPermissions();
     return () => {
@@ -169,10 +175,19 @@ export const SettingsPage = () => {
           </div>
 
           <button
-            onClick={() => loadPermissions(true)}
-            disabled={loading || isRefreshing}
-            className="btn btn-secondary"
-            style={{ fontSize: "0.82rem", padding: "6px 12px", minHeight: "38px", display: "flex", alignItems: "center", gap: "6px" }}
+            type="button"
+            onClick={handleSync}
+            aria-disabled={loading || isRefreshing}
+            className={`btn btn-secondary settings-sync-btn ${isRefreshing ? "is-refreshing" : ""}`}
+            style={{
+              fontSize: "0.82rem",
+              padding: "6px 12px",
+              minHeight: "38px",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              cursor: "pointer",
+            }}
             title="Reload current permissions from database"
           >
             <RefreshCw size={13} className={isRefreshing ? "animate-spin-slow" : ""} />
