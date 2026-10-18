@@ -63,6 +63,61 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  let isButtonSynced = false;
+  let revertTimeoutId = null;
+
+  function renderSyncButtonDefault() {
+    syncNowBtn.classList.remove("is-synced", "is-error", "is-syncing", "is-disabled");
+    syncNowBtn.disabled = false;
+    syncNowBtn.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="1 4 1 10 7 10"></polyline>
+        <polyline points="23 20 23 14 17 14"></polyline>
+        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+      </svg>
+      <span>Sync Now</span>
+    `;
+  }
+
+  function renderSyncButtonSynced() {
+    syncNowBtn.classList.remove("is-error", "is-syncing", "is-disabled");
+    syncNowBtn.classList.add("is-synced");
+    syncNowBtn.disabled = false;
+    syncNowBtn.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+      <span>Synced!</span>
+    `;
+  }
+
+  function renderSyncButtonDisabled() {
+    syncNowBtn.classList.remove("is-synced", "is-syncing", "is-error");
+    syncNowBtn.classList.add("is-disabled");
+    syncNowBtn.disabled = true;
+    syncNowBtn.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+      </svg>
+      <span>Disabled</span>
+    `;
+  }
+
+  function renderSyncButtonError() {
+    syncNowBtn.classList.remove("is-synced", "is-syncing", "is-disabled");
+    syncNowBtn.classList.add("is-error");
+    syncNowBtn.disabled = false;
+    syncNowBtn.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <span>Error</span>
+    `;
+  }
+
   /**
    * Safely format any error response or syncStatus value to a human-readable string.
    */
@@ -239,6 +294,33 @@ document.addEventListener("DOMContentLoaded", async () => {
       const isTracking = data.trackingEnabled !== false;
       trackingToggle.checked = isTracking;
 
+      // Sync button state: disabled when tracking is paused OR user is logged out / session expired
+      const isSyncDisabled = !isTracking || !loggedIn;
+
+      if (isSyncDisabled) {
+        if (!loggedIn) {
+          isButtonSynced = false;
+        } else if (syncNowBtn.classList.contains("is-synced") || isButtonSynced || data.syncStatus === "Synced") {
+          isButtonSynced = true;
+        }
+        if (revertTimeoutId) {
+          clearTimeout(revertTimeoutId);
+          revertTimeoutId = null;
+        }
+        renderSyncButtonDisabled();
+      } else if (syncNowBtn.classList.contains("is-disabled")) {
+        if (isButtonSynced) {
+          renderSyncButtonSynced();
+          if (revertTimeoutId) clearTimeout(revertTimeoutId);
+          revertTimeoutId = setTimeout(() => {
+            isButtonSynced = false;
+            renderSyncButtonDefault();
+          }, 2200);
+        } else {
+          renderSyncButtonDefault();
+        }
+      }
+
       // Queue count
       const queue = data.eventQueue || [];
       queueBadge.textContent = `${queue.length} buffered`;
@@ -342,9 +424,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Manual Sync Button with smooth reload animation
   syncNowBtn.addEventListener("click", async () => {
     if (syncNowBtn.disabled) return;
+    const { trackingEnabled, token, authState } = await chrome.storage.local.get([
+      "trackingEnabled",
+      "token",
+      "authState",
+    ]);
+    const isSessionExpired = authState === "expired";
+    const isLoggedIn = Boolean(token) && !isSessionExpired;
+    if (trackingEnabled === false || !isLoggedIn) {
+      isButtonSynced = false;
+      renderSyncButtonDisabled();
+      return;
+    }
+
+    if (revertTimeoutId) {
+      clearTimeout(revertTimeoutId);
+      revertTimeoutId = null;
+    }
 
     syncNowBtn.disabled = true;
-    syncNowBtn.classList.remove("is-synced", "is-error");
+    syncNowBtn.classList.remove("is-synced", "is-error", "is-disabled");
     syncNowBtn.classList.add("is-syncing");
     syncNowBtn.innerHTML = `
       <svg class="sync-spinner" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
@@ -372,26 +471,23 @@ document.addEventListener("DOMContentLoaded", async () => {
       await new Promise((r) => setTimeout(r, 1500 - elapsed));
     }
 
+    const curData = await chrome.storage.local.get(["trackingEnabled", "token", "authState"]);
+    const curIsLoggedIn = Boolean(curData.token) && curData.authState !== "expired";
+    if (curData.trackingEnabled === false || !curIsLoggedIn) {
+      isButtonSynced = false;
+      renderSyncButtonDisabled();
+      await refreshUI();
+      return;
+    }
+
     syncNowBtn.classList.remove("is-syncing");
 
     if (syncError) {
-      syncNowBtn.classList.add("is-error");
-      syncNowBtn.innerHTML = `
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
-        <span>Error</span>
-      `;
+      isButtonSynced = false;
+      renderSyncButtonError();
     } else {
-      syncNowBtn.classList.add("is-synced");
-      syncNowBtn.innerHTML = `
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
-        <span>Synced!</span>
-      `;
+      isButtonSynced = true;
+      renderSyncButtonSynced();
       if (queueBadge) {
         queueBadge.classList.remove("badge-pop");
         void queueBadge.offsetWidth; // trigger reflow
@@ -406,17 +502,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     await refreshUI();
 
     // Revert back to default state after 2200ms
-    setTimeout(() => {
-      syncNowBtn.classList.remove("is-synced", "is-error");
-      syncNowBtn.disabled = false;
-      syncNowBtn.innerHTML = `
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="1 4 1 10 7 10"></polyline>
-          <polyline points="23 20 23 14 17 14"></polyline>
-          <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
-        </svg>
-        <span>Sync Now</span>
-      `;
+    revertTimeoutId = setTimeout(async () => {
+      const latest = await chrome.storage.local.get(["trackingEnabled", "token", "authState"]);
+      const latestIsLoggedIn = Boolean(latest.token) && latest.authState !== "expired";
+      if (latest.trackingEnabled !== false && latestIsLoggedIn) {
+        isButtonSynced = false;
+        renderSyncButtonDefault();
+      } else {
+        renderSyncButtonDisabled();
+      }
     }, 2200);
   });
 
@@ -494,6 +588,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Logout Button
   logoutBtn.addEventListener("click", async () => {
+    isButtonSynced = false;
+    if (revertTimeoutId) {
+      clearTimeout(revertTimeoutId);
+      revertTimeoutId = null;
+    }
+    renderSyncButtonDisabled();
     await chrome.storage.local.remove(["token", "refreshToken", "authState", "userEmail"]);
     await chrome.storage.local.set({ syncStatus: "Ready" });
     clearBadge();

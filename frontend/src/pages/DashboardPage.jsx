@@ -32,7 +32,6 @@ export const DashboardPage = () => {
   const [range, setRange] = useState("today");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [rotationAngle, setRotationAngle] = useState(0);
   const [summary, setSummary] = useState(null);
   const [appsData, setAppsData] = useState(null);
   const [timelineData, setTimelineData] = useState(null);
@@ -76,8 +75,8 @@ export const DashboardPage = () => {
       setLoading(false);
       if (isManualRefresh) {
         const elapsed = Date.now() - startTime;
-        if (elapsed < 900) {
-          await new Promise((resolve) => setTimeout(resolve, 900 - elapsed));
+        if (elapsed < 1600) {
+          await new Promise((resolve) => setTimeout(resolve, 1600 - elapsed));
         }
         setRefreshing(false);
       }
@@ -85,7 +84,7 @@ export const DashboardPage = () => {
   };
 
   const handleRefresh = () => {
-    setRotationAngle((prev) => prev + 180);
+    if (refreshing) return;
     fetchData(true);
   };
 
@@ -121,14 +120,19 @@ export const DashboardPage = () => {
             <button
               type="button"
               onClick={handleRefresh}
-              disabled={refreshing}
+              aria-disabled={refreshing}
               className={`btn-reload ${refreshing ? "is-refreshing" : ""}`}
               aria-label="Refresh metrics"
+              style={{
+                cursor: "pointer",
+                WebkitTapHighlightColor: "transparent",
+                outline: "none",
+                userSelect: "none",
+              }}
             >
               <RefreshCw
                 size={16}
-                className="reload-icon"
-                style={{ transform: `rotate(${rotationAngle}deg)` }}
+                className={`reload-icon ${refreshing ? "animate-spin-slow" : ""}`}
               />
             </button>
           </div>
