@@ -1,3 +1,9 @@
+"""Pydantic data schemas package.
+
+Exports request payloads, validation models, and response formats for authentication,
+dashboard analytics, and activity tracking ingestion.
+"""
+
 from app.schemas.auth import (
     AcceptInstructionsRequest,
     LoginRequest,

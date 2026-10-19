@@ -1,11 +1,25 @@
+"""Tracking ingestion and permission configuration Pydantic schemas.
+
+This module defines request payloads, input normalization/sanitization hooks,
+and response models for desktop app usage, browser page visits, YouTube watching sessions,
+and user permission configurations.
+"""
+
 from datetime import datetime, timezone
 from typing import Self
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
+# ==============================================================================
+# Desktop Application Tracking Schemas
+# ==============================================================================
 class AppUsageCreate(BaseModel):
-    """Schema for recording an application usage event."""
+    """Schema for recording a desktop application usage event.
+
+    Includes validators to sanitize window titles, enforce process name limits,
+    and automatically compute session duration from start and end timestamps.
+    """
 
     app_name: str = Field(default="Unknown Application", max_length=255)
     window_title: str | None = Field(default=None)
@@ -16,6 +30,7 @@ class AppUsageCreate(BaseModel):
     @field_validator("window_title", mode="before")
     @classmethod
     def sanitize_window_title(cls, v: object) -> str | None:
+        """Strip and truncate window titles to a maximum of 512 characters."""
         if v is None:
             return None
         s = str(v).strip()
@@ -24,11 +39,13 @@ class AppUsageCreate(BaseModel):
     @field_validator("app_name", mode="before")
     @classmethod
     def sanitize_app_name(cls, v: object) -> str:
+        """Sanitize process/app name, defaulting to 'Unknown Application' if empty."""
         s = str(v or "").strip() or "Unknown Application"
         return s[:255]
 
     @model_validator(mode="after")
     def compute_duration(self) -> Self:
+        """Automatically calculate duration_seconds from end_time - start_time if not provided."""
         if self.duration_seconds is None:
             diff = int((self.end_time - self.start_time).total_seconds())
             self.duration_seconds = max(diff, 0)
@@ -36,7 +53,7 @@ class AppUsageCreate(BaseModel):
 
 
 class AppUsageResponse(BaseModel):
-    """Schema for returning tracked application usage data."""
+    """Schema for returning tracked desktop application usage data."""
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -50,8 +67,14 @@ class AppUsageResponse(BaseModel):
     created_at: datetime
 
 
+# ==============================================================================
+# Web Browser Activity Tracking Schemas
+# ==============================================================================
 class BrowserActivityCreate(BaseModel):
-    """Schema for recording a browser page visit."""
+    """Schema for recording a browser page visit.
+
+    Includes sanitization for page titles, browser names, and defaults timestamps to UTC now.
+    """
 
     browser: str = Field(default="Chrome", max_length=100)
     url: str = Field(min_length=1)
@@ -61,6 +84,7 @@ class BrowserActivityCreate(BaseModel):
     @field_validator("title", mode="before")
     @classmethod
     def sanitize_title(cls, v: object) -> str | None:
+        """Strip and truncate document/tab title to 1024 characters."""
         if v is None:
             return None
         s = str(v).strip()
@@ -69,6 +93,7 @@ class BrowserActivityCreate(BaseModel):
     @field_validator("browser", mode="before")
     @classmethod
     def sanitize_browser(cls, v: object) -> str:
+        """Sanitize browser name, defaulting to 'Chrome' if unspecified."""
         if not v:
             return "Chrome"
         s = str(v).strip()
@@ -76,13 +101,14 @@ class BrowserActivityCreate(BaseModel):
 
     @model_validator(mode="after")
     def default_timestamp(self) -> Self:
+        """Ensure a UTC timestamp exists if none was supplied by the client."""
         if self.timestamp is None:
             self.timestamp = datetime.now(timezone.utc)
         return self
 
 
 class BrowserActivityResponse(BaseModel):
-    """Schema for returning browser activity data."""
+    """Schema for returning recorded browser activity data."""
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -95,8 +121,11 @@ class BrowserActivityResponse(BaseModel):
     created_at: datetime
 
 
+# ==============================================================================
+# YouTube Activity Tracking Schemas
+# ==============================================================================
 class YouTubeActivityCreate(BaseModel):
-    """Schema for recording YouTube video watching activity."""
+    """Schema for recording a YouTube video watching activity event."""
 
     video_id: str = Field(min_length=1, max_length=64)
     video_title: str = Field(min_length=1, max_length=512)
@@ -106,13 +135,14 @@ class YouTubeActivityCreate(BaseModel):
 
     @model_validator(mode="after")
     def default_timestamp(self) -> Self:
+        """Default watch timestamp to current UTC time if omitted."""
         if self.timestamp is None:
             self.timestamp = datetime.now(timezone.utc)
         return self
 
 
 class YouTubeActivityResponse(BaseModel):
-    """Schema for returning YouTube activity data."""
+    """Schema for returning recorded YouTube activity data."""
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -126,8 +156,11 @@ class YouTubeActivityResponse(BaseModel):
     created_at: datetime
 
 
+# ==============================================================================
+# Tracking Permissions Schemas
+# ==============================================================================
 class PermissionResponse(BaseModel):
-    """Schema for returning user tracking permissions."""
+    """Schema for returning current user tracking permissions."""
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -138,9 +171,8 @@ class PermissionResponse(BaseModel):
 
 
 class PermissionUpdate(BaseModel):
-    """Schema for partially updating tracking permissions."""
+    """Schema for partially updating user tracking permissions."""
 
     app_tracking: bool | None = None
     browser_tracking: bool | None = None
     youtube_tracking: bool | None = None
-

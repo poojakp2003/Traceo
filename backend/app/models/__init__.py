@@ -1,3 +1,9 @@
+"""Database ORM models package.
+
+Exports all SQLAlchemy models for user profiles, permissions, application sessions,
+browser activity, and YouTube viewing history.
+"""
+
 from app.models.app_usage import AppUsage
 from app.models.browser_activity import BrowserActivity
 from app.models.permission import Permission

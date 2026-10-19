@@ -1,9 +1,24 @@
+"""Dashboard analytics and reporting Pydantic schemas.
+
+This module defines data transfer schemas for summary statistics, application usage breakdowns,
+browser domain summaries, YouTube viewing analytics, timeline charts, and browser visit history.
+"""
+
 from datetime import datetime
 from pydantic import BaseModel
 
 
+# ==============================================================================
+# Duration Formatting Helper
+# ==============================================================================
 def format_duration(seconds: int) -> str:
-    """Formats an integer duration in seconds into human-readable text."""
+    """Formats an integer duration in seconds into human-readable text.
+
+    Examples:
+        - 45 -> "45 secs"
+        - 120 -> "2 mins"
+        - 3665 -> "1 hr 1 min"
+    """
     if seconds <= 0:
         return "0 mins"
     if seconds < 60:
@@ -17,8 +32,12 @@ def format_duration(seconds: int) -> str:
         parts.append(f"{minutes} min" if minutes == 1 else f"{minutes} mins")
     return " ".join(parts)
 
+
+# ==============================================================================
+# Overview Summary Metrics Schema
+# ==============================================================================
 class DashboardSummaryResponse(BaseModel):
-    """Schema for top-level usage summary metrics across periods."""
+    """Schema for top-level usage summary metrics across periods (today, 7d, 30d)."""
 
     today_seconds: int
     today_formatted: str
@@ -31,8 +50,11 @@ class DashboardSummaryResponse(BaseModel):
     total_videos_watched: int
 
 
+# ==============================================================================
+# Application Usage Schemas
+# ==============================================================================
 class AppUsageItem(BaseModel):
-    """Schema representing aggregated usage for a specific application."""
+    """Schema representing aggregated usage metrics for a specific application."""
 
     app_name: str
     duration_seconds: int
@@ -42,7 +64,7 @@ class AppUsageItem(BaseModel):
 
 
 class DashboardAppsResponse(BaseModel):
-    """Schema for returning aggregated app usage analytics."""
+    """Schema for returning aggregated app usage analytics for a time range."""
 
     range: str
     total_duration_seconds: int
@@ -50,6 +72,9 @@ class DashboardAppsResponse(BaseModel):
     items: list[AppUsageItem]
 
 
+# ==============================================================================
+# Browser Domain Schemas
+# ==============================================================================
 class BrowserDomainItem(BaseModel):
     """Schema representing aggregated visits for a specific domain."""
 
@@ -60,15 +85,18 @@ class BrowserDomainItem(BaseModel):
 
 
 class DashboardBrowserResponse(BaseModel):
-    """Schema for returning domain-aggregated browser analytics."""
+    """Schema for returning domain-aggregated browser analytics for a time range."""
 
     range: str
     total_visits: int
     items: list[BrowserDomainItem]
 
 
+# ==============================================================================
+# YouTube Activity Schemas
+# ==============================================================================
 class YouTubeItem(BaseModel):
-    """Schema representing aggregated watching stats for a YouTube video."""
+    """Schema representing aggregated watching stats for an individual YouTube video."""
 
     video_id: str
     video_title: str
@@ -80,7 +108,7 @@ class YouTubeItem(BaseModel):
 
 
 class DashboardYouTubeResponse(BaseModel):
-    """Schema for returning aggregated YouTube analytics."""
+    """Schema for returning aggregated YouTube analytics for a time range."""
 
     range: str
     total_watched_seconds: int
@@ -88,8 +116,11 @@ class DashboardYouTubeResponse(BaseModel):
     items: list[YouTubeItem]
 
 
+# ==============================================================================
+# Timeline & Trend Chart Schemas
+# ==============================================================================
 class TimelinePoint(BaseModel):
-    """Schema representing a single day's activity on the timeline."""
+    """Schema representing a single interval (hour or day) on the activity timeline."""
 
     date: str
     day: str
@@ -100,7 +131,7 @@ class TimelinePoint(BaseModel):
 
 
 class DashboardTimelineResponse(BaseModel):
-    """Schema for returning multi-day timeline activity trends."""
+    """Schema for returning multi-day or hourly timeline activity trends."""
 
     range: str
     total_hours: float
@@ -108,6 +139,9 @@ class DashboardTimelineResponse(BaseModel):
     items: list[TimelinePoint]
 
 
+# ==============================================================================
+# Detailed Browser History Schemas
+# ==============================================================================
 class BrowserHistoryItem(BaseModel):
     """Schema representing an individual browser history event."""
 
@@ -126,5 +160,3 @@ class DashboardBrowserHistoryResponse(BaseModel):
     range: str
     total_count: int
     items: list[BrowserHistoryItem]
-
-

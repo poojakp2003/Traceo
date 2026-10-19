@@ -1,3 +1,14 @@
+"""Dashboard analytics, reporting, and timeline visualization router.
+
+This module aggregates collected productivity and activity telemetry:
+- High-level metric summaries (today, 7 days, 30 days total duration and event counts)
+- Application usage rankings with percentages and session counts
+- Domain-level browser visit statistics
+- YouTube watch times and video rankings
+- Multi-day or hourly timeline activity charts
+- Chronological browser history logs with automatic dev URL filtering
+"""
+
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse
@@ -27,9 +38,16 @@ from app.schemas.dashboard import (
     format_duration,
 )
 
+# ==============================================================================
+# Router Configuration
+# ==============================================================================
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 
+# ==============================================================================
+# Domain & URL Sanitization Utilities
+# ==============================================================================
+# List of internal development hosts to ignore in dashboard metrics
 IGNORED_HOSTS = [
     "localhost:5173",
     "127.0.0.1:5173",
@@ -62,7 +80,7 @@ def is_project_url(url: str | None) -> bool:
 
 
 def is_project_domain(domain: str | None) -> bool:
-    """Check if domain belongs to the local project."""
+    """Check if domain belongs to the local development project."""
     if not domain:
         return False
     lower = domain.strip().lower()
@@ -70,7 +88,15 @@ def is_project_domain(domain: str | None) -> bool:
 
 
 def get_range_cutoff(range_key: str) -> datetime | None:
-    """Computes cutoff datetime based on range parameter."""
+    """Computes a UTC cutoff datetime based on the requested range parameter.
+
+    Supported values:
+    - 'today': Midnight UTC of current day
+    - '24h': Exactly 24 hours prior
+    - '7d': 7 days prior
+    - '30d': 30 days prior
+    - 'all': None (unbounded query)
+    """
     now = datetime.now(timezone.utc)
     key = range_key.lower().strip()
 
@@ -93,7 +119,7 @@ def get_range_cutoff(range_key: str) -> datetime | None:
 
 
 def extract_domain(url: str) -> str:
-    """Extract clean domain name from URL."""
+    """Extract clean domain name (without 'www.') from a full URL."""
     cleaned = url.strip()
     if not cleaned.startswith(("http://", "https://")):
         cleaned = "https://" + cleaned
@@ -107,7 +133,9 @@ def extract_domain(url: str) -> str:
         return cleaned
 
 
-
+# ==============================================================================
+# Overview Summary Metrics Endpoint
+# ==============================================================================
 @router.get(
     "/summary",
     response_model=DashboardSummaryResponse,
@@ -117,13 +145,21 @@ def get_dashboard_summary(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> DashboardSummaryResponse:
-    """Retrieve high-level dashboard metrics (today, 7d, 30d totals and counts)."""
+    """Retrieve high-level dashboard metrics (today, 7d, 30d totals and counts).
+
+    Flow:
+    1. Determines date boundaries (today midnight, 7 days ago, 30 days ago).
+    2. Sums desktop application durations for each period.
+    3. Sums YouTube watch durations for each period.
+    4. Merges durations into composite totals.
+    5. Counts total recorded sessions across all activities.
+    """
     now = datetime.now(timezone.utc)
     start_of_today = now.replace(hour=0, minute=0, second=0, microsecond=0)
     seven_days_ago = now - timedelta(days=7)
     thirty_days_ago = now - timedelta(days=30)
 
-    # App usage durations
+    # Block: Query application usage durations across periods
     today_app_seconds = db.scalar(
         select(func.coalesce(func.sum(AppUsage.duration_seconds), 0)).where(
             AppUsage.user_id == current_user.id,
@@ -145,7 +181,7 @@ def get_dashboard_summary(
         )
     ) or 0
 
-    # YouTube watch durations
+    # Block: Query YouTube video watch durations across periods
     today_yt_seconds = db.scalar(
         select(func.coalesce(func.sum(YouTubeActivity.watched_time_seconds), 0)).where(
             YouTubeActivity.user_id == current_user.id,
@@ -167,11 +203,12 @@ def get_dashboard_summary(
         )
     ) or 0
 
+    # Block: Combine app and video durations into composite totals
     today_seconds = today_app_seconds + today_yt_seconds
     week_seconds = week_app_seconds + week_yt_seconds
     month_seconds = month_app_seconds + month_yt_seconds
 
-    # Activity counts
+    # Block: Query total recorded event counts
     total_app_sessions = db.scalar(
         select(func.count(AppUsage.id)).where(AppUsage.user_id == current_user.id)
     ) or 0
@@ -189,6 +226,7 @@ def get_dashboard_summary(
         )
     ) or 0
 
+    # Block: Construct and return summary response
     return DashboardSummaryResponse(
         today_seconds=today_seconds,
         today_formatted=format_duration(today_seconds),
@@ -202,6 +240,9 @@ def get_dashboard_summary(
     )
 
 
+# ==============================================================================
+# Application Usage Breakdown Endpoint
+# ==============================================================================
 @router.get(
     "/apps",
     response_model=DashboardAppsResponse,
@@ -212,9 +253,17 @@ def get_dashboard_apps(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> DashboardAppsResponse:
-    """Retrieve application usage statistics grouped by app and ordered by duration."""
+    """Retrieve application usage statistics grouped by app and ordered by duration.
+
+    Flow:
+    1. Computes time cutoff filter.
+    2. Groups app_usage records by app_name, aggregating duration and session count.
+    3. Calculates percentage share of total application time.
+    4. Formats durations and returns structured list.
+    """
     cutoff = get_range_cutoff(range)
 
+    # Block: Build aggregation query
     query = (
         select(
             AppUsage.app_name,
@@ -230,9 +279,9 @@ def get_dashboard_apps(
         query = query.where(AppUsage.start_time >= cutoff)
 
     results = db.execute(query).all()
-
     total_duration = sum(row.total_duration for row in results) if results else 0
 
+    # Block: Build response items with relative percentages
     items: list[AppUsageItem] = []
     for row in results:
         dur = int(row.total_duration)
@@ -255,6 +304,9 @@ def get_dashboard_apps(
     )
 
 
+# ==============================================================================
+# Browser Domain Activity Breakdown Endpoint
+# ==============================================================================
 @router.get(
     "/browser",
     response_model=DashboardBrowserResponse,
@@ -265,9 +317,17 @@ def get_dashboard_browser(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> DashboardBrowserResponse:
-    """Retrieve domain-aggregated browser activity and visit percentages."""
+    """Retrieve domain-aggregated browser activity and visit percentages.
+
+    Flow:
+    1. Queries browser activity records for the user within time range.
+    2. Parses URLs to domains and filters out internal development origins.
+    3. Tracks visit counts and latest visit timestamp per domain.
+    4. Computes percentage share per domain and returns sorted list.
+    """
     cutoff = get_range_cutoff(range)
 
+    # Block: Query raw visit records excluding development patterns
     query = select(BrowserActivity.url, BrowserActivity.timestamp).where(
         BrowserActivity.user_id == current_user.id,
         not_(or_(*(BrowserActivity.url.ilike(f"%{h}%") for h in IGNORED_HOSTS))),
@@ -278,6 +338,7 @@ def get_dashboard_browser(
 
     rows = db.execute(query).all()
 
+    # Block: Aggregate counts and latest visits by extracted domain
     domain_counts: dict[str, int] = defaultdict(int)
     domain_latest: dict[str, datetime] = {}
 
@@ -293,6 +354,7 @@ def get_dashboard_browser(
     total_visits = sum(domain_counts.values())
     sorted_domains = sorted(domain_counts.items(), key=lambda x: x[1], reverse=True)
 
+    # Block: Format response payload with visit share percentages
     items: list[BrowserDomainItem] = []
     for domain, count in sorted_domains:
         percentage = round((count / total_visits) * 100, 1) if total_visits > 0 else 0.0
@@ -312,6 +374,9 @@ def get_dashboard_browser(
     )
 
 
+# ==============================================================================
+# YouTube Video Breakdown Endpoint
+# ==============================================================================
 @router.get(
     "/youtube",
     response_model=DashboardYouTubeResponse,
@@ -322,9 +387,17 @@ def get_dashboard_youtube(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> DashboardYouTubeResponse:
-    """Retrieve YouTube viewing activity grouped by video and sorted by watch duration."""
+    """Retrieve YouTube viewing activity grouped by video and sorted by watch duration.
+
+    Flow:
+    1. Applies time cutoff filter.
+    2. Groups youtube_activity by video_id and video_title.
+    3. Sums watch time and counts playback sessions.
+    4. Returns sorted list of watched videos.
+    """
     cutoff = get_range_cutoff(range)
 
+    # Block: Query video watch aggregates from database
     query = (
         select(
             YouTubeActivity.video_id,
@@ -347,9 +420,9 @@ def get_dashboard_youtube(
         query = query.where(YouTubeActivity.timestamp >= cutoff)
 
     results = db.execute(query).all()
-
     total_watched = sum(row.total_watched for row in results) if results else 0
 
+    # Block: Assemble response model list
     items: list[YouTubeItem] = []
     for row in results:
         watched_sec = int(row.total_watched)
@@ -373,6 +446,9 @@ def get_dashboard_youtube(
     )
 
 
+# ==============================================================================
+# Timeline Activity Trend Chart Endpoint
+# ==============================================================================
 @router.get(
     "/timeline",
     response_model=DashboardTimelineResponse,
@@ -386,16 +462,15 @@ def get_dashboard_timeline(
     """Retrieve hourly (for 'today') or daily timeline points for charting combined app + YouTube usage duration."""
     cutoff = get_range_cutoff(time_range)
     now = datetime.now(timezone.utc)
-
     key = time_range.lower().strip()
 
-    # ── TODAY: return 24 hourly buckets (0h–23h) ─────────────────────────────
+    # Block: Handle single-day 'today' timeline: return 24 hourly buckets (0h through 23h)
     if key == "today":
         today_local = now.date()
         hourly_seconds: dict[int, int] = defaultdict(int)
         hourly_sessions: dict[int, int] = defaultdict(int)
 
-        # App usage
+        # Aggregate desktop app usage into hour buckets
         app_query = select(AppUsage.start_time, AppUsage.duration_seconds).where(
             AppUsage.user_id == current_user.id,
             AppUsage.start_time >= cutoff,
@@ -405,7 +480,7 @@ def get_dashboard_timeline(
             hourly_seconds[h] += rec.duration_seconds
             hourly_sessions[h] += 1
 
-        # YouTube
+        # Aggregate YouTube playback into hour buckets
         yt_q = select(YouTubeActivity.timestamp, YouTubeActivity.watched_time_seconds).where(
             YouTubeActivity.user_id == current_user.id,
             YouTubeActivity.timestamp >= cutoff,
@@ -415,6 +490,7 @@ def get_dashboard_timeline(
             hourly_seconds[h] += rec.watched_time_seconds
             hourly_sessions[h] += 1
 
+        # Construct all 24 hourly points
         items: list[TimelinePoint] = []
         total_sec = 0
         for h in range(24):
@@ -438,7 +514,7 @@ def get_dashboard_timeline(
             items=items,
         )
 
-    # ── MULTI-DAY: aggregate by calendar date ────────────────────────────────
+    # Block: Multi-day timeline aggregation (calendar date buckets)
     match key:
         case "30d":
             day_count = 30
@@ -480,6 +556,7 @@ def get_dashboard_timeline(
         daily_seconds[d_str] += rec.watched_time_seconds
         daily_sessions[d_str] += 1
 
+    # Format points for each calendar day
     items: list[TimelinePoint] = []
     total_sec = 0
 
@@ -507,6 +584,9 @@ def get_dashboard_timeline(
     )
 
 
+# ==============================================================================
+# Chronological Browser History Log Endpoint
+# ==============================================================================
 @router.get(
     "/browser-history",
     response_model=DashboardBrowserHistoryResponse,
@@ -518,8 +598,14 @@ def get_dashboard_browser_history(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> DashboardBrowserHistoryResponse:
-    """Retrieve chronological list of individual browser history records."""
-    # Proactively clean up any legacy internal project records for the user
+    """Retrieve chronological list of individual browser history records.
+
+    Flow:
+    1. Proactively cleans up any legacy internal development project records.
+    2. Queries browser activity records ordered by descending timestamp.
+    3. Filters out dev origins and returns up to `limit` records.
+    """
+    # Block: Proactively clean up any legacy internal project records for the user
     try:
         cleanup_query = select(BrowserActivity.id).where(
             BrowserActivity.user_id == current_user.id,
@@ -534,6 +620,7 @@ def get_dashboard_browser_history(
 
     cutoff = get_range_cutoff(range)
 
+    # Block: Query filtered browser activity rows
     query = (
         select(BrowserActivity)
         .where(
@@ -549,6 +636,7 @@ def get_dashboard_browser_history(
     query = query.limit(limit)
     rows = db.scalars(query).all()
 
+    # Block: Extract domain and format timestamp for frontend display
     items: list[BrowserHistoryItem] = []
     for row in rows:
         dom = extract_domain(row.url)
