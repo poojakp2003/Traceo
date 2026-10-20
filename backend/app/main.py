@@ -77,7 +77,7 @@ async def lifespan(app: FastAPI):
 # ==============================================================================
 # FastAPI App Initialization
 # ==============================================================================
-app = FastAPI(title="Tracker API", lifespan=lifespan)
+app = FastAPI(title="Tracker API", version="1.0.0", lifespan=lifespan)
 
 
 # ==============================================================================
@@ -110,8 +110,14 @@ app.include_router(dashboard_router)    # Aggregated metrics, charts & history (
 
 
 # ==============================================================================
-# Health Check Endpoints
+# Root & Health Check Endpoints
 # ==============================================================================
+@app.get("/")
+def root() -> dict[str, str]:
+    """Default endpoint returning service name and version."""
+    return {"name": "Traceo", "version": "1.0.0"}
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
     """Basic health check endpoint returning server availability status."""
