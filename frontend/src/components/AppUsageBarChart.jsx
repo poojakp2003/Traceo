@@ -28,12 +28,12 @@ const CustomTooltip = ({ active, payload, isHoursMode }) => {
     return (
       <div
         style={{
-          background: "rgba(15, 23, 42, 0.95)",
-          border: "1px solid rgba(255, 255, 255, 0.15)",
+          background: "rgba(18, 18, 21, 0.96)",
+          border: "1px solid rgba(255, 255, 255, 0.12)",
           backdropFilter: "blur(12px)",
           padding: "12px 16px",
           borderRadius: "10px",
-          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.5)",
+          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.6)",
           color: "#F9FAFB",
           minWidth: "160px",
         }}
@@ -149,7 +149,7 @@ export const AppUsageBarChart = ({ items = [], totalDurationFormatted = "0 mins"
             <CartesianGrid
               strokeDasharray="3 3"
               horizontal={false}
-              stroke={isDark ? "rgba(6, 182, 212, 0.08)" : "rgba(8, 145, 178, 0.1)"}
+              stroke={isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(8, 145, 178, 0.1)"}
             />
             <XAxis
               type="number"

@@ -44,12 +44,12 @@ const CustomTooltip = ({ active, payload, label }) => {
     return (
       <div
         style={{
-          background: "rgba(15, 23, 42, 0.95)",
-          border: "1px solid rgba(255, 255, 255, 0.15)",
+          background: "rgba(18, 18, 21, 0.96)",
+          border: "1px solid rgba(255, 255, 255, 0.12)",
           backdropFilter: "blur(12px)",
           padding: "12px 16px",
           borderRadius: "10px",
-          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.5)",
+          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.6)",
           color: "#F9FAFB",
           minWidth: "150px",
         }}
@@ -157,7 +157,7 @@ export const UsageTimeLineChart = ({ items = [], totalHours = 0, range = "7d" })
             </defs>
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke={isDark ? "rgba(139, 92, 246, 0.08)" : "rgba(124, 58, 237, 0.1)"}
+              stroke={isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(124, 58, 237, 0.1)"}
               vertical={false}
             />
             <XAxis

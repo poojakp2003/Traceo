@@ -1,14 +1,14 @@
 @import url('https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap');
 
 :root {
-  --bg-main: #0B0F19;
-  --bg-card: rgba(17, 24, 39, 0.75);
-  --bg-card-hover: rgba(31, 41, 55, 0.85);
-  --bg-input: rgba(15, 23, 42, 0.8);
-  --bg-input-solid: #0F172A;
+  --bg-main: #0B0B0D;
+  --bg-card: rgba(18, 18, 21, 0.85);
+  --bg-card-hover: rgba(28, 28, 32, 0.95);
+  --bg-input: rgba(18, 18, 21, 0.85);
+  --bg-input-solid: #131316;
   --bg-item-row: rgba(255, 255, 255, 0.025);
   --bg-item-row-hover: rgba(255, 255, 255, 0.05);
-  --navbar-bg: rgba(11, 15, 25, 0.85);
+  --navbar-bg: rgba(11, 11, 13, 0.92);
   --border-subtle: rgba(255, 255, 255, 0.08);
   --border-focus: rgba(6, 182, 212, 0.5);
   
@@ -115,9 +115,7 @@ body {
   font-family: var(--font-satoshi);
   font-size: 1rem;
   background-color: var(--bg-main);
-  background-image: 
-    radial-gradient(circle at 15% 15%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.08) 0%, transparent 40%);
+  background-image: none;
   background-attachment: fixed;
   color: var(--text-primary);
   min-height: 100vh;
@@ -676,7 +674,7 @@ input:-webkit-autofill:focus {
 
 .filter-pill.active {
   background: var(--primary);
-  color: #0B0F19;
+  color: #0B0B0D;
   box-shadow: 0 2px 8px var(--primary-glow);
 }
 
@@ -920,17 +918,17 @@ input:-webkit-autofill:focus {
   height: 24px;
 }
 
-/* Pointing RIGHT = Default Dark Space Theme */
+/* Pointing RIGHT = Default Dark Matte Theme */
 .capsule-switch.theme-dark {
-  background: linear-gradient(135deg, #1E293B, #0F172A);
-  border: 1px solid rgba(6, 182, 212, 0.45);
-  box-shadow: 0 0 14px rgba(6, 182, 212, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(135deg, #26262B, #141416);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 14px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .capsule-switch.theme-dark .capsule-knob {
   transform: translateX(28px);
-  background: #0B0F19;
-  border: 1px solid rgba(6, 182, 212, 0.5);
+  background: #0B0B0D;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: #22D3EE;
 }
 
