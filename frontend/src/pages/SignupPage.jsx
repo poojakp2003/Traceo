@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   Activity,
   AlertCircle,
-  ArrowRight,
   Check,
   Eye,
   EyeOff,
@@ -84,7 +83,7 @@ export const SignupPage = () => {
       return { isValid: false, message: "Email cannot contain consecutive dots." };
     }
     if (!EMAIL_REGEX.test(trimmed)) {
-      return { isValid: false, message: "Please enter a valid email address (e.g. name@domain.com)." };
+      return { isValid: false, message: "Please enter a valid email address (e.g. name@company.com)." };
     }
 
     const parts = trimmed.split("@");
@@ -362,7 +361,7 @@ export const SignupPage = () => {
                       ? "rgba(16, 185, 129, 0.6)"
                       : undefined,
                 }}
-                placeholder="you@company.com"
+                placeholder="name@company.com"
                 value={email}
                 onBlur={() => setEmailTouched(true)}
                 onChange={(e) => {
@@ -680,7 +679,6 @@ export const SignupPage = () => {
             }}
           >
             {loading ? "Creating secure account..." : "Sign Up"}
-            {!loading && <ArrowRight size={16} />}
           </button>
         </form>
 

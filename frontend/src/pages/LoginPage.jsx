@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Activity, AlertCircle, ArrowRight, Lock, Mail } from "lucide-react";
+import { Activity, AlertCircle, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 export const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -154,15 +155,38 @@ export const LoginPage = () => {
               <Lock size={16} color="var(--text-muted)" style={{ position: "absolute", left: "14px", top: "15px" }} />
               <input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
                 required
                 className="input-field"
-                style={{ paddingLeft: "42px" }}
+                style={{ paddingLeft: "42px", paddingRight: "42px" }}
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                style={{
+                  position: "absolute",
+                  right: "12px",
+                  top: "13px",
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "var(--text-muted)",
+                  padding: "4px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "color 0.2s ease",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
           </div>
 
@@ -173,7 +197,6 @@ export const LoginPage = () => {
             style={{ width: "100%", marginTop: "10px", minHeight: "44px" }}
           >
             {loading ? "Signing in..." : "Sign In"}
-            {!loading && <ArrowRight size={16} />}
           </button>
         </form>
 
