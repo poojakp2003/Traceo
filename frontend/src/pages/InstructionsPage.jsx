@@ -201,7 +201,6 @@ export const InstructionsPage = () => {
                 style={{ fontSize: "0.85rem", padding: "6px 16px" }}
               >
                 Return to Dashboard
-                <ArrowRight size={14} />
               </button>
             </div>
           )}
