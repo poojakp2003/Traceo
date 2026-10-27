@@ -43,6 +43,8 @@ FRIENDLY_APP_NAMES: dict[str, str] = {
     "postman.exe": "Postman",
     "zoom.exe": "Zoom",
     "teams.exe": "Microsoft Teams",
+    "whatsapp.root.exe": "WhatsApp",
+    "whatsapp.exe": "WhatsApp",
 }
 
 

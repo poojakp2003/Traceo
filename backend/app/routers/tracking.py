@@ -64,6 +64,16 @@ def get_or_create_user_permission(db: Session, user_id: int) -> Permission:
     return perm
 
 
+def normalize_app_name(name: str) -> str:
+    """Normalize common process or application names to human-friendly titles."""
+    if not name:
+        return name
+    lower = name.strip().lower()
+    if lower in ("whatsapp.root", "whatsapp.root.exe", "whatsapp.exe"):
+        return "WhatsApp"
+    return name
+
+
 # ==============================================================================
 # Desktop Application Usage Ingestion Endpoints
 # ==============================================================================
@@ -98,7 +108,7 @@ def track_app_usage(
         records = [
             AppUsage(
                 user_id=current_user.id,
-                app_name=item.app_name,
+                app_name=normalize_app_name(item.app_name),
                 window_title=item.window_title,
                 start_time=item.start_time,
                 end_time=item.end_time,
@@ -115,7 +125,7 @@ def track_app_usage(
     # Block: Handle single application usage item ingestion
     record = AppUsage(
         user_id=current_user.id,
-        app_name=payload.app_name,
+        app_name=normalize_app_name(payload.app_name),
         window_title=payload.window_title,
         start_time=payload.start_time,
         end_time=payload.end_time,
