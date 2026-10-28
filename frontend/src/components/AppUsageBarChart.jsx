@@ -12,7 +12,7 @@ import {
 import { Clock, Layers } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 
-const BAR_COLORS = [
+export const BAR_COLORS = [
   "#06B6D4", // Cyan
   "#8B5CF6", // Purple
   "#3B82F6", // Blue
@@ -56,7 +56,12 @@ const CustomTooltip = ({ active, payload, isHoursMode }) => {
   return null;
 };
 
-export const AppUsageBarChart = ({ items = [], totalDurationFormatted = "0 mins" }) => {
+export const AppUsageBarChart = ({
+  items = [],
+  totalDurationFormatted = "0 mins",
+  selectedApp = null,
+  onSelectApp = () => {},
+}) => {
   const { isDark } = useTheme();
 
   if (!items || items.length === 0) {
@@ -90,13 +95,14 @@ export const AppUsageBarChart = ({ items = [], totalDurationFormatted = "0 mins"
   // If top timed app reaches 1 hour (>= 3600 seconds), convert X-axis to hours; otherwise show in minutes
   const isHoursMode = topAppDurationSeconds >= 3600;
 
-  const chartData = items.slice(0, 8).map((item) => {
+  const chartData = items.slice(0, 8).map((item, idx) => {
     const sec = item.duration_seconds || 0;
     const displayValue = isHoursMode
       ? Number((sec / 3600).toFixed(2))
       : Number((sec / 60).toFixed(1));
     return {
       ...item,
+      color: BAR_COLORS[idx % BAR_COLORS.length],
       displayValue,
     };
   });
@@ -105,6 +111,19 @@ export const AppUsageBarChart = ({ items = [], totalDurationFormatted = "0 mins"
     ...chartData.map((d) => d.displayValue || 0),
     0
   );
+
+  const isAnySelected = Boolean(selectedApp);
+
+  const handleSelect = (appItem) => {
+    if (!appItem || !onSelectApp) return;
+    if (selectedApp && selectedApp.name === appItem.app_name) {
+      return; // Clicking the selected app again does nothing
+    }
+    onSelectApp({
+      name: appItem.app_name,
+      color: appItem.color,
+    });
+  };
 
   // Compute clean whole number ticks (e.g. 0, 1, 2, 3...)
   const getWholeNumberTicks = (maxVal, isHours) => {
@@ -145,6 +164,11 @@ export const AppUsageBarChart = ({ items = [], totalDurationFormatted = "0 mins"
             data={chartData}
             layout="vertical"
             margin={{ top: 5, right: 24, left: 8, bottom: 5 }}
+            onClick={(state) => {
+              if (state && state.activePayload && state.activePayload.length) {
+                handleSelect(state.activePayload[0].payload);
+              }
+            }}
           >
             <CartesianGrid
               strokeDasharray="3 3"
@@ -172,16 +196,40 @@ export const AppUsageBarChart = ({ items = [], totalDurationFormatted = "0 mins"
               dataKey="app_name"
               type="category"
               stroke={isDark ? "rgba(255, 255, 255, 0.2)" : "rgba(0, 0, 0, 0.2)"}
-              tick={{
-                fill: isDark ? "#CBD5E1" : "#334155",
-                fontSize: 11,
-                fontWeight: 500,
-                fontFamily: "var(--font-satoshi), 'Satoshi', sans-serif",
+              tick={(props) => {
+                const { x, y, payload } = props;
+                const name = payload.value;
+                const isSelected = selectedApp && selectedApp.name === name;
+                const opacity = isAnySelected ? (isSelected ? 1.0 : 0.3) : 1.0;
+                const truncated = name && name.length > 12 ? `${name.slice(0, 11)}…` : name;
+                return (
+                  <g
+                    transform={`translate(${x},${y})`}
+                    style={{ cursor: "pointer" }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const entry = chartData.find((d) => d.app_name === name);
+                      if (entry) handleSelect(entry);
+                    }}
+                  >
+                    <text
+                      x={-4}
+                      y={4}
+                      textAnchor="end"
+                      fill={isSelected ? (isDark ? "#38BDF8" : "#0891B2") : (isDark ? "#CBD5E1" : "#334155")}
+                      fillOpacity={opacity}
+                      fontSize={11}
+                      fontWeight={isSelected ? 700 : 500}
+                      fontFamily="var(--font-satoshi), 'Satoshi', sans-serif"
+                    >
+                      {truncated}
+                    </text>
+                  </g>
+                );
               }}
               tickLine={false}
               axisLine={{ stroke: isDark ? "rgba(255, 255, 255, 0.15)" : "rgba(0, 0, 0, 0.15)" }}
               width={82}
-              tickFormatter={(name) => (name && name.length > 12 ? `${name.slice(0, 11)}…` : name)}
             />
             <Tooltip
               content={<CustomTooltip isHoursMode={isHoursMode} />}
@@ -192,13 +240,24 @@ export const AppUsageBarChart = ({ items = [], totalDurationFormatted = "0 mins"
               radius={[0, 6, 6, 0]}
               barSize={18}
               animationDuration={800}
+              style={{ cursor: "pointer" }}
+              onClick={(entry) => {
+                if (entry) handleSelect(entry);
+              }}
             >
-              {chartData.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={BAR_COLORS[index % BAR_COLORS.length]}
-                />
-              ))}
+              {chartData.map((entry, index) => {
+                const isSelected = selectedApp && selectedApp.name === entry.app_name;
+                const opacity = isAnySelected ? (isSelected ? 1.0 : 0.3) : 1.0;
+                return (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.color}
+                    fillOpacity={opacity}
+                    cursor="pointer"
+                    onClick={() => handleSelect(entry)}
+                  />
+                );
+              })}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
