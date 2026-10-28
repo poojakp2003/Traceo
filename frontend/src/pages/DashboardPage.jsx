@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Activity,
   Calendar,
@@ -19,6 +19,8 @@ import {
   getDashboardYouTube,
 } from "../api/dashboard";
 import { AppUsageBarChart } from "../components/AppUsageBarChart";
+import { AppWeeklyBarChart } from "../components/AppWeeklyBarChart";
+import { formatDateISO } from "../components/DateNavigator";
 import { BrowserActivityTable } from "../components/BrowserActivityTable";
 import { Navbar } from "../components/Navbar";
 import { RangeSelector } from "../components/RangeSelector";
@@ -39,6 +41,59 @@ export const DashboardPage = () => {
   const [browserHistory, setBrowserHistory] = useState(null);
   const [youtubeData, setYoutubeData] = useState(null);
   const [error, setError] = useState("");
+
+  // Shared state for app selection and weekly navigation
+  const [selectedApp, setSelectedApp] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [appWeeklyData, setAppWeeklyData] = useState([]);
+  const [weeklyLoading, setWeeklyLoading] = useState(false);
+  const lastFetchedWeekRef = useRef("");
+
+  const fetchAppWeeklyTimeline = async (app, date) => {
+    if (!app) return;
+    const cur = new Date(date);
+    cur.setHours(0, 0, 0, 0);
+    const sunday = new Date(cur);
+    sunday.setDate(cur.getDate() - cur.getDay());
+    const saturday = new Date(sunday);
+    saturday.setDate(sunday.getDate() + 6);
+
+    const startStr = formatDateISO(sunday);
+    const endStr = formatDateISO(saturday);
+
+    setWeeklyLoading(true);
+    try {
+      const res = await getDashboardTimeline("7d", app.name, startStr, endStr);
+      setAppWeeklyData(res?.items || []);
+    } catch (err) {
+      console.error("Failed to fetch app weekly timeline:", err);
+      setAppWeeklyData([]);
+    } finally {
+      setWeeklyLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!selectedApp) {
+      setAppWeeklyData([]);
+      lastFetchedWeekRef.current = "";
+      return;
+    }
+
+    const cur = new Date(selectedDate);
+    cur.setHours(0, 0, 0, 0);
+    const sunday = new Date(cur);
+    sunday.setDate(cur.getDate() - cur.getDay());
+    const sundayStr = formatDateISO(sunday);
+    const key = `${selectedApp.name}_${sundayStr}`;
+
+    if (lastFetchedWeekRef.current === key) {
+      return;
+    }
+
+    lastFetchedWeekRef.current = key;
+    fetchAppWeeklyTimeline(selectedApp, selectedDate);
+  }, [selectedApp, selectedDate]);
 
   const fetchData = async (isManualRefresh = false) => {
     if (isManualRefresh) setRefreshing(true);
@@ -234,11 +289,13 @@ export const DashboardPage = () => {
               <AppUsageBarChart
                 items={appsData?.items || []}
                 totalDurationFormatted={appsData?.total_duration_formatted || "0 mins"}
+                selectedApp={selectedApp}
+                onSelectApp={setSelectedApp}
               />
             )}
           </div>
 
-          {/* Line Chart: Shows usage over time */}
+          {/* Line Chart / App Weekly Bar Graph: Shows usage over time */}
           <div className="glass-card">
             <div
               style={{
@@ -268,23 +325,71 @@ export const DashboardPage = () => {
                 <div>
                   <h2 style={{ fontSize: "1.15rem" }}>Usage Over Time</h2>
                   <p style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>
-                    {range === "today" ? "Hourly usage breakdown (0–23h)" : "Daily usage trend across days"}
+                    {selectedApp
+                      ? "Weekly application usage trend"
+                      : range === "today"
+                      ? "Hourly usage breakdown (0–23h)"
+                      : "Daily usage trend across days"}
                   </p>
                 </div>
               </div>
-              <span className="badge badge-purple">{range.toUpperCase()}</span>
+              {selectedApp ? (
+                <button
+                  type="button"
+                  onClick={() => setSelectedApp(null)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "4px 14px",
+                    borderRadius: "20px",
+                    fontSize: "0.8rem",
+                    fontWeight: 600,
+                    background: "rgba(139, 92, 246, 0.16)",
+                    color: "#C4B5FD",
+                    border: "1px solid rgba(139, 92, 246, 0.35)",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    outline: "none",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "rgba(139, 92, 246, 0.28)";
+                    e.currentTarget.style.borderColor = "rgba(139, 92, 246, 0.55)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "rgba(139, 92, 246, 0.16)";
+                    e.currentTarget.style.borderColor = "rgba(139, 92, 246, 0.35)";
+                  }}
+                >
+                  All apps
+                </button>
+              ) : (
+                <span className="badge badge-purple">{range.toUpperCase()}</span>
+              )}
             </div>
 
-            {loading ? (
+            {selectedApp ? (
+              <div className="card-content-fade" key={selectedApp.name}>
+                <AppWeeklyBarChart
+                  selectedApp={selectedApp}
+                  selectedDate={selectedDate}
+                  onSelectDate={setSelectedDate}
+                  weeklyData={appWeeklyData}
+                  loading={weeklyLoading}
+                />
+              </div>
+            ) : loading ? (
               <div style={{ height: "280px", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <div className="skeleton" style={{ height: "240px", width: "100%" }} />
               </div>
             ) : (
-              <UsageTimeLineChart
-                items={timelineData?.items || []}
-                totalHours={timelineData?.total_hours || 0}
-                range={range}
-              />
+              <div className="card-content-fade" key="all-apps">
+                <UsageTimeLineChart
+                  items={timelineData?.items || []}
+                  totalHours={timelineData?.total_hours || 0}
+                  range={range}
+                />
+              </div>
             )}
           </div>
         </div>
