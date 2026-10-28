@@ -1538,3 +1538,20 @@ input:-webkit-autofill:focus {
   }
 }
 
+/* Card view switch fade animation */
+.card-content-fade {
+  animation: cardViewFadeIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes cardViewFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+

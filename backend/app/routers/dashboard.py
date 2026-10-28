@@ -456,13 +456,104 @@ def get_dashboard_youtube(
 )
 def get_dashboard_timeline(
     time_range: str = Query(default="7d", alias="range", description="Time period (today, 24h, 7d, 30d, all)"),
+    app: str | None = Query(default=None, description="Optional application name filter"),
+    start_date: str | None = Query(default=None, description="Optional start date (YYYY-MM-DD)"),
+    end_date: str | None = Query(default=None, description="Optional end date (YYYY-MM-DD)"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> DashboardTimelineResponse:
-    """Retrieve hourly (for 'today') or daily timeline points for charting combined app + YouTube usage duration."""
-    cutoff = get_range_cutoff(time_range)
+    """Retrieve hourly (for 'today') or daily timeline points for charting combined app + YouTube usage duration.
+
+    Supports optional app filter and explicit custom date boundaries (start_date, end_date).
+    """
     now = datetime.now(timezone.utc)
-    key = time_range.lower().strip()
+    key = (time_range if isinstance(time_range, str) else "7d").lower().strip()
+    app_filter = app.strip() if isinstance(app, str) and app.strip() else None
+    has_custom_dates = (
+        isinstance(start_date, str)
+        and isinstance(end_date, str)
+        and start_date.strip()
+        and end_date.strip()
+    )
+
+    # Block: Handle explicit custom date range if start_date and end_date are provided
+    if has_custom_dates:
+        try:
+            start_d = datetime.strptime(start_date.strip(), "%Y-%m-%d").date()
+            end_d = datetime.strptime(end_date.strip(), "%Y-%m-%d").date()
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="start_date and end_date must be in YYYY-MM-DD format",
+            )
+
+        diff = (end_d - start_d).days
+        if diff < 0 or diff > 31:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Date range must be between 1 and 31 days",
+            )
+
+        target_dates = [start_d + timedelta(days=i) for i in range(diff + 1)]
+        start_dt = datetime.combine(start_d, datetime.min.time(), tzinfo=timezone.utc)
+        end_dt = datetime.combine(end_d, datetime.max.time(), tzinfo=timezone.utc)
+
+        query = select(AppUsage.start_time, AppUsage.duration_seconds).where(
+            AppUsage.user_id == current_user.id,
+            AppUsage.start_time >= start_dt,
+            AppUsage.start_time <= end_dt,
+        )
+        if app_filter:
+            query = query.where(func.lower(AppUsage.app_name) == app_filter.lower())
+
+        records = db.execute(query).all()
+        daily_seconds: dict[str, int] = defaultdict(int)
+        daily_sessions: dict[str, int] = defaultdict(int)
+
+        for rec in records:
+            d_str = rec.start_time.date().strftime("%Y-%m-%d")
+            daily_seconds[d_str] += rec.duration_seconds
+            daily_sessions[d_str] += 1
+
+        if app_filter is None or app_filter.lower() == "youtube":
+            yt_query = select(YouTubeActivity.timestamp, YouTubeActivity.watched_time_seconds).where(
+                YouTubeActivity.user_id == current_user.id,
+                YouTubeActivity.timestamp >= start_dt,
+                YouTubeActivity.timestamp <= end_dt,
+            )
+            yt_records = db.execute(yt_query).all()
+            for rec in yt_records:
+                d_str = rec.timestamp.date().strftime("%Y-%m-%d")
+                daily_seconds[d_str] += rec.watched_time_seconds
+                daily_sessions[d_str] += 1
+
+        items: list[TimelinePoint] = []
+        total_sec = 0
+
+        for d in target_dates:
+            d_str = d.strftime("%Y-%m-%d")
+            dur = daily_seconds.get(d_str, 0)
+            total_sec += dur
+            hours = round(dur / 3600.0, 2)
+            items.append(
+                TimelinePoint(
+                    date=d_str,
+                    day=d.strftime("%A"),
+                    hours=hours,
+                    duration_seconds=dur,
+                    duration_formatted=format_duration(dur),
+                    session_count=daily_sessions.get(d_str, 0),
+                )
+            )
+
+        return DashboardTimelineResponse(
+            range=f"{start_date.strip()}_{end_date.strip()}",
+            total_hours=round(total_sec / 3600.0, 1),
+            total_duration_formatted=format_duration(total_sec),
+            items=items,
+        )
+
+    cutoff = get_range_cutoff(key)
 
     # Block: Handle single-day 'today' timeline: return 24 hourly buckets (0h through 23h)
     if key == "today":
@@ -475,20 +566,24 @@ def get_dashboard_timeline(
             AppUsage.user_id == current_user.id,
             AppUsage.start_time >= cutoff,
         )
+        if app_filter:
+            app_query = app_query.where(func.lower(AppUsage.app_name) == app_filter.lower())
+
         for rec in db.execute(app_query).all():
             h = rec.start_time.hour
             hourly_seconds[h] += rec.duration_seconds
             hourly_sessions[h] += 1
 
         # Aggregate YouTube playback into hour buckets
-        yt_q = select(YouTubeActivity.timestamp, YouTubeActivity.watched_time_seconds).where(
-            YouTubeActivity.user_id == current_user.id,
-            YouTubeActivity.timestamp >= cutoff,
-        )
-        for rec in db.execute(yt_q).all():
-            h = rec.timestamp.hour
-            hourly_seconds[h] += rec.watched_time_seconds
-            hourly_sessions[h] += 1
+        if app_filter is None or app_filter.lower() == "youtube":
+            yt_q = select(YouTubeActivity.timestamp, YouTubeActivity.watched_time_seconds).where(
+                YouTubeActivity.user_id == current_user.id,
+                YouTubeActivity.timestamp >= cutoff,
+            )
+            for rec in db.execute(yt_q).all():
+                h = rec.timestamp.hour
+                hourly_seconds[h] += rec.watched_time_seconds
+                hourly_sessions[h] += 1
 
         # Construct all 24 hourly points
         items: list[TimelinePoint] = []
@@ -508,7 +603,7 @@ def get_dashboard_timeline(
             )
 
         return DashboardTimelineResponse(
-            range=time_range,
+            range=key,
             total_hours=round(total_sec / 3600.0, 1),
             total_duration_formatted=format_duration(total_sec),
             items=items,
@@ -531,6 +626,8 @@ def get_dashboard_timeline(
     )
     if cutoff is not None:
         query = query.where(AppUsage.start_time >= cutoff)
+    if app_filter:
+        query = query.where(func.lower(AppUsage.app_name) == app_filter.lower())
 
     records = db.execute(query).all()
 
@@ -543,18 +640,19 @@ def get_dashboard_timeline(
         daily_sessions[d_str] += 1
 
     # Fetch YouTube watch records for user in range and merge into the same daily buckets
-    yt_query = select(YouTubeActivity.timestamp, YouTubeActivity.watched_time_seconds).where(
-        YouTubeActivity.user_id == current_user.id
-    )
-    if cutoff is not None:
-        yt_query = yt_query.where(YouTubeActivity.timestamp >= cutoff)
+    if app_filter is None or app_filter.lower() == "youtube":
+        yt_query = select(YouTubeActivity.timestamp, YouTubeActivity.watched_time_seconds).where(
+            YouTubeActivity.user_id == current_user.id
+        )
+        if cutoff is not None:
+            yt_query = yt_query.where(YouTubeActivity.timestamp >= cutoff)
 
-    yt_records = db.execute(yt_query).all()
+        yt_records = db.execute(yt_query).all()
 
-    for rec in yt_records:
-        d_str = rec.timestamp.date().strftime("%Y-%m-%d")
-        daily_seconds[d_str] += rec.watched_time_seconds
-        daily_sessions[d_str] += 1
+        for rec in yt_records:
+            d_str = rec.timestamp.date().strftime("%Y-%m-%d")
+            daily_seconds[d_str] += rec.watched_time_seconds
+            daily_sessions[d_str] += 1
 
     # Format points for each calendar day
     items: list[TimelinePoint] = []
