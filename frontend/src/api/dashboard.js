@@ -20,8 +20,12 @@ export const getDashboardYouTube = async (range = "7d") => {
   return response.data;
 };
 
-export const getDashboardTimeline = async (range = "7d") => {
-  const response = await apiClient.get(`/dashboard/timeline?range=${range}`);
+export const getDashboardTimeline = async (range = "7d", app = null, startDate = null, endDate = null) => {
+  let url = `/dashboard/timeline?range=${encodeURIComponent(range)}`;
+  if (app) url += `&app=${encodeURIComponent(app)}`;
+  if (startDate) url += `&start_date=${encodeURIComponent(startDate)}`;
+  if (endDate) url += `&end_date=${encodeURIComponent(endDate)}`;
+  const response = await apiClient.get(url);
   return response.data;
 };
 
