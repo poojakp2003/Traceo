@@ -164,6 +164,8 @@ export const AppUsageBarChart = ({
             data={chartData}
             layout="vertical"
             margin={{ top: 5, right: 24, left: 8, bottom: 5 }}
+            accessibilityLayer={false}
+            style={{ outline: "none" }}
             onClick={(state) => {
               if (state && state.activePayload && state.activePayload.length) {
                 handleSelect(state.activePayload[0].payload);
@@ -254,6 +256,7 @@ export const AppUsageBarChart = ({
                     fill={entry.color}
                     fillOpacity={opacity}
                     cursor="pointer"
+                    style={{ outline: "none" }}
                     onClick={() => handleSelect(entry)}
                   />
                 );

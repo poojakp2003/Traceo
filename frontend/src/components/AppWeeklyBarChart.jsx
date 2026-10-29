@@ -282,6 +282,8 @@ export const AppWeeklyBarChart = ({
           <BarChart
             data={chartData}
             margin={{ top: 8, right: 12, left: -10, bottom: 0 }}
+            accessibilityLayer={false}
+            style={{ outline: "none" }}
             onClick={(state) => {
               if (state && state.activePayload && state.activePayload.length) {
                 const item = state.activePayload[0].payload;

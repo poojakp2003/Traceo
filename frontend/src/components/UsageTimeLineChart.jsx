@@ -148,6 +148,8 @@ export const UsageTimeLineChart = ({ items = [], totalHours = 0, range = "7d" })
           <AreaChart
             data={chartData}
             margin={{ top: 10, right: 18, left: 6, bottom: 5 }}
+            accessibilityLayer={false}
+            style={{ outline: "none" }}
           >
             <defs>
               <linearGradient id="usageGradient" x1="0" y1="0" x2="0" y2="1">
